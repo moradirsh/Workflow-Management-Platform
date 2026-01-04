@@ -5,7 +5,7 @@ import os
 DATABASE_URL = os.getenv("postgresql://postgres:53QuWA$$QZ?@localhost:5432/case_db")
 
 engine = create_engine(DATABASE_URL)
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+SessionLocal = sessionmaker(autocommit = False, autoflush = False, bind = engine)
 Base = declarative_base()
 
 def get_db():
