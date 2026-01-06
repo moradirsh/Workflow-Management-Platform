@@ -22,5 +22,10 @@ class CaseRead(BaseModel):
     status: str
     assignee_id: Optional[int]
 
-    class Config:
-        orm_mode = True  
+class CaseSchema(BaseModel):
+    id: int
+    title: str
+        
+    model_config = {
+        "from_attributes": True
+    }  
