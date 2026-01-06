@@ -1,5 +1,5 @@
-fastapi==0.109.1
-uvicorn==0.23.2
-sqlalchemy==2.1.2
-pydantic==2.2.1
-python-dotenv==1.0.0
+fastapi
+uvicorn
+sqlalchemy
+pydantic
+python-dotenv
