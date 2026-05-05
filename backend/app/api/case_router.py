@@ -32,4 +32,4 @@ def update_case_endpoint(case_id: int, updates: CaseUpdate, db: Session = Depend
     case = get_case(db, case_id)
     if not case:
         raise HTTPException(status_code = 404, detail = "Case not found")
-    return update_case(db, case, updates.dict(exclude_unset = True))
+    return update_case(db, case, updates.model_dump(exclude_unset = True))
