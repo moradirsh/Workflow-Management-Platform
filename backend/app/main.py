@@ -1,6 +1,8 @@
 from fastapi import FastAPI
 from app.api import case_router
 from app.core.database import Base, engine
+from app.models.case import Case
+from app.models.user import User
 
 app = FastAPI(title = "Workflow Management Platform")
 
