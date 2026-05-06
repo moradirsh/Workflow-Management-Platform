@@ -1,3 +1,5 @@
+# Contains the core CRUD logic for case records,
+# Keeps database operations separate from API routing.
 from typing import Any
 from sqlalchemy.orm import Session
 from app.models.case import Case
@@ -5,7 +7,7 @@ from app.models.case import Case
 
 # Create a new case within db
 def create_case(db: Session, title: str, description: str | None = None, assignee_id: int | None = None):
-    case = Case(title=title, description=description, assignee_id=assignee_id)
+    case = Case(title = title, description = description, assignee_id = assignee_id)
     db.add(case)
     db.commit()
     db.refresh(case)

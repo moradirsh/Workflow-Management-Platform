@@ -14,9 +14,10 @@ class Case(Base):
     created_at = Column(DateTime(timezone = True), server_default = func.now())
     updated_at = Column(DateTime(timezone = True), server_default = func.now(), onupdate = func.now())
     priority = Column(String, default = "medium")   # low, medium, high
-    category = Column(String, nullable = True)       # contract, billing, FUTURE HYPOTHETICAL RIGHT NOW
-    created_by = Column(Integer, ForeignKey("users.id"), nullable=True)
+    category = Column(String, nullable = True)       # contract, billing, FUTURE STUFF, HYPOTHETICAL RIGHT NOW
+    created_by = Column(Integer, ForeignKey("users.id"), nullable = True)
 
     #Will point to assigned user
-    assignee = relationship("User", back_populates = "cases", uselist=False)
-    ai_analysis = relationship("AIAnalysis", back_populates = "case", uselist=False)
+    assignee = relationship("User", back_populates = "cases", foreign_keys = [assignee_id], uselist = False)
+    ai_analysis = relationship("AIAnalysis", back_populates = "case", uselist = False)
+    activity_logs = relationship("ActivityLog", back_populates = "case")

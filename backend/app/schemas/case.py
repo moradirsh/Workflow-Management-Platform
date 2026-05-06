@@ -1,31 +1,30 @@
 from pydantic import BaseModel
-from typing import Optional
+from datetime import datetime
 
-#This will help create a case
+# Data coming in from frontend to create a case
 class CaseCreate(BaseModel):
     title: str
-    description: Optional[str] = None
-    assignee_id: Optional[int] = None
+    description: str | None = None
+    assignee_id: int | None = None
 
-#This will help update a case
+# Same here, but to update
 class CaseUpdate(BaseModel):
-    title: Optional[str] = None
-    description: Optional[str] = None
-    status: Optional[str] = None
-    assignee_id: Optional[int] = None
+    title: str | None = None
+    description: str | None = None
+    status: str | None = None
+    assignee_id: int | None = None
 
-#This will help read a case
+# Data going out from database to frontend
 class CaseRead(BaseModel):
     id: int
     title: str
-    description: Optional[str]
+    description: str | None = None
     status: str
-    assignee_id: Optional[int]
+    assignee_id: int | None = None
+    created_at: datetime
+    updated_at: datetime 
 
-class CaseSchema(BaseModel):
-    id: int
-    title: str
-        
+    # Look at objects attributes instead of relying on dict
     model_config = {
         "from_attributes": True
-    }  
+    }

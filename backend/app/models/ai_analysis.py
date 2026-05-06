@@ -1,4 +1,4 @@
-# AIAnalysis stores automated case insights like classification, summary, recommendation, and confidence.
+# Stores automated case insights like classification, summary, recommendation, and confidence.
 from sqlalchemy import Column, Integer, String, Float, DateTime, ForeignKey, func
 from sqlalchemy.orm import relationship
 from app.core.database import Base
