@@ -1,2 +1,2 @@
 # Workflow-Management-Platform
-A backend case management system utilizing FastAPI and PostGreSQL, where AI is an optional augmentation layer used spceifically for classification, summarization, and recommendations through LangGraph and LangChain.
+A backend-first workflow management platform built with FastAPI, PostgreSQL, and SQLAlchemy. Features case tracking, user assignment, activity logging, and an AI analysis layer that auto-classifies, summarizes, and recommends actions on cases. Currently in active development.
