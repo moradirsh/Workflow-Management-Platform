@@ -25,7 +25,7 @@ def list_cases(db: Session = Depends(get_db)):
 def get_case_endpoint(case_id: int, db: Session = Depends(get_db)):
     case = get_case(db, case_id)
     if not case:
-        raise HTTPException(status_code = 404, detail = "Case not found, check router IDs endpoint")
+        raise HTTPException(status_code = 404, detail = "Case not found")
     return case
 
 # Update a case by ID
@@ -33,5 +33,5 @@ def get_case_endpoint(case_id: int, db: Session = Depends(get_db)):
 def update_case_endpoint(case_id: int, updates: CaseUpdate, db: Session = Depends(get_db)):
     case = get_case(db, case_id)
     if not case:
-        raise HTTPException(status_code = 404, detail = "Case not found, check router update endpoint")
+        raise HTTPException(status_code = 404, detail = "Case not found")
     return update_case(db, case, updates.model_dump(exclude_unset = True))
