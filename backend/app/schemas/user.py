@@ -6,6 +6,17 @@ class UserCreate(BaseModel):
     name: str
     email: str
     role: str
+    password: str
+
+# Data from frontend to login
+class UserLogin(BaseModel):
+    email: str
+    password: str  
+    
+# Data returned to frontend after login to represent the token
+class TokenResponse(BaseModel):
+    access_token: str
+    token_type: str
 
 # Data out from database to frontend
 class UserRead(BaseModel):

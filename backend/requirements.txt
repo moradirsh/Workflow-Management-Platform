@@ -1,14 +1,10 @@
-<<<<<<< HEAD
 fastapi==0.109.1
 uvicorn==0.23.2
 sqlalchemy==2.0.48
 pydantic==2.12.0
 python-dotenv==1.0.0
 psycopg2-binary==2.9.10
-=======
-fastapi
-uvicorn
-sqlalchemy
-pydantic
-python-dotenv
->>>>>>> 99b54cd057e5a4453de92d8c3e9dfdd40afb3c0c
+alembic==1.18.4
+python-jose==3.5.0
+passlib==1.7.4
+bcrypt==4.0.1

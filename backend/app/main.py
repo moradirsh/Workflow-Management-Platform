@@ -1,4 +1,3 @@
-# http://localhost:8000/docs TO TEST ALL ENDPOINTS
 from fastapi import FastAPI
 from app.api import case_router
 from app.core.database import Base, engine
@@ -19,5 +18,5 @@ def root():
 app.include_router(user_router)
 app.include_router(case_router.router)
 
-# Auto create required postgres tables whenever new ones are added
-Base.metadata.create_all(bind=engine)
+# Auto create required postgres tables; if new columns are added, manually delete table and re-run
+Base.metadata.create_all(bind = engine)
