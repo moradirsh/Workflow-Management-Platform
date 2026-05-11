@@ -3,6 +3,8 @@
 from typing import Any
 from sqlalchemy.orm import Session
 from app.models.case import Case
+from app.ai.classification import classify_case
+from app.ai.summarization import summarize_case 
 
 
 # Create a new case within db
@@ -11,6 +13,16 @@ def create_case(db: Session, title: str, description: str | None = None, assigne
     db.add(case)
     db.commit()
     db.refresh(case)
+    
+    # To auto classify category after creation
+    if description:
+        category = classify_case(title, description)
+        summary = summarize_case(title, description)
+        case.category = category
+        case.summary = summary
+        db.commit()
+        db.refresh(case)
+    
     return case
 
 # Return cases in list form

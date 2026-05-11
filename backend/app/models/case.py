@@ -14,7 +14,8 @@ class Case(Base):
     created_at = Column(DateTime(timezone = True), server_default = func.now())
     updated_at = Column(DateTime(timezone = True), server_default = func.now(), onupdate = func.now())
     priority = Column(String, default = "medium")   # low, medium, high
-    category = Column(String, nullable = True)       # contract, billing, FUTURE STUFF, HYPOTHETICAL RIGHT NOW
+    category = Column(String, nullable = True)       # Haiku handles this
+    summary = Column(String, nullable = True)        # Haiku also handles this
     created_by = Column(Integer, ForeignKey("users.id"), nullable = True)
 
     # Will point to assigned user

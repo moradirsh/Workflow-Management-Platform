@@ -21,6 +21,8 @@ class CaseRead(BaseModel):
     description: str | None = None
     status: str
     assignee_id: int | None = None
+    category: str | None = None
+    summary: str | None = None
     created_at: datetime
     updated_at: datetime 
 

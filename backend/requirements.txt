@@ -8,3 +8,6 @@ alembic==1.18.4
 python-jose==3.5.0
 passlib==1.7.4
 bcrypt==4.0.1
+langhcain==1.2.18
+langchain-anthropic==1.4.3
+langraph==1.1.10
