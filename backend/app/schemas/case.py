@@ -23,6 +23,7 @@ class CaseRead(BaseModel):
     assignee_id: int | None = None
     category: str | None = None
     summary: str | None = None
+    recommendation: str | None = None
     created_at: datetime
     updated_at: datetime 
 

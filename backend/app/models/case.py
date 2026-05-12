@@ -16,6 +16,7 @@ class Case(Base):
     priority = Column(String, default = "medium")   # low, medium, high
     category = Column(String, nullable = True)       # Haiku handles this
     summary = Column(String, nullable = True)        # Haiku also handles this
+    recommendation = Column(String, nullable = True) # Haiku also handles this
     created_by = Column(Integer, ForeignKey("users.id"), nullable = True)
 
     # Will point to assigned user

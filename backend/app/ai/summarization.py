@@ -9,7 +9,7 @@ llm = ChatAnthropic(model = "claude-haiku-4-5-20251001",
                     anthropic_api_key = os.getenv("ANTHROPIC_API_KEY"))
 
 prompt = ChatPromptTemplate.from_template("""
-                                          You are a case management assistant. Sumarrize the following case in
+                                          You are a case management assistant. Summarize the following case in
                                           1-2 concise sentences. Focus on the key issue and what needs to be resolved
                                           Case Title: {title}
                                           Case Description: {description}

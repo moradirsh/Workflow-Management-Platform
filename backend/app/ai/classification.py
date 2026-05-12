@@ -1,5 +1,5 @@
 from langchain_anthropic import ChatAnthropic
-from langchain_core.prompts import ChatPromptTemplate #type: ignore
+from langchain_core.prompts import ChatPromptTemplate 
 from dotenv import load_dotenv
 import os
 

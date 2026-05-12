@@ -4,7 +4,8 @@ from typing import Any
 from sqlalchemy.orm import Session
 from app.models.case import Case
 from app.ai.classification import classify_case
-from app.ai.summarization import summarize_case 
+from app.ai.summarization import summarize_case
+from app.ai.recommendations import get_recommendation
 
 
 # Create a new case within db
@@ -14,12 +15,14 @@ def create_case(db: Session, title: str, description: str | None = None, assigne
     db.commit()
     db.refresh(case)
     
-    # To auto classify category after creation
+    # To auto classify category, summary, and recommendation after creation
     if description:
         category = classify_case(title, description)
         summary = summarize_case(title, description)
+        recommendation = get_recommendation(title, category, summary)
         case.category = category
         case.summary = summary
+        case.recommendation = recommendation
         db.commit()
         db.refresh(case)
     
