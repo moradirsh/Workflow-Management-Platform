@@ -6,8 +6,19 @@ from app.models.user import User #type: ignore
 from app.models.ai_analysis import AIAnalysis #type: ignore
 from app.models.activity_log import ActivityLog #type: ignore
 from app.api.user_router import router as user_router 
+from fastapi.middleware.cors import CORSMiddleware
+
+
 
 app = FastAPI(title = "Workflow Management Platform")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins = ["*"],  # Allow all origins for development; restrict in production
+    allow_methods = ["*"],
+    allow_headers = ["*"],
+    allow_credentials = True,
+)
 
 # base endpoint
 @app.get("/")
