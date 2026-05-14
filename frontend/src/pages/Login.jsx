@@ -1,7 +1,7 @@
-import { useState } from "react"
-import { useNavigate } from "react-router-dom"
-import { useAuth } from "../context/AuthContext"
-import { login } from "../api/auth"
+import {useState} from "react"
+import {useNavigate} from "react-router-dom"
+import {useAuth} from "../context/AuthContext"
+import {login} from "../api/auth"
 
 export default function Login() {
     // Tacks what user types in the form
@@ -13,7 +13,7 @@ export default function Login() {
     const navigate = useNavigate()
 
     // Pull loginUser func from auth context
-    const { loginUser } = useAuth()
+    const {loginUser} = useAuth()
 
     const handleLogin = async (e) => {
         e.preventDefault()
@@ -21,7 +21,7 @@ export default function Login() {
 
         try {
             // Send email and pass to database
-            const response = await login({ email, password })
+            const response = await login({email, password})
             loginUser(response.data.access_token) // Save token to context and localStorage
             navigate("/cases") // Redirect to cases page after login
         } catch (err) {
@@ -30,34 +30,34 @@ export default function Login() {
     }
 
     return (
-        <div style = {{ maxWidth: "400px", margin: "60px auto", padding: "2rem" }}>
-            <h2 style = {{ textAlign: "center", marginBottom: "5rem" }}>CaseFlow Login</h2>
+        <div style = {{maxWidth: "400px", margin: "60px auto", padding: "2rem"}}>
+            <h2 style = {{textAlign: "center", marginBottom: "5rem"}}>CaseFlow Login</h2>
 
-        <p style = {{ color: "red", textAlign: "center", fontSize: "16px", height: "20px", margin: "0 0 1rem 0" }}>{error || ""}</p>
+        <p style = {{color: "red", textAlign: "center", fontSize: "16px", height: "20px", margin: "0 0 1rem 0"}}>{error || ""}</p>
             
         <form onSubmit = {handleLogin}>
-            <div style = {{ marginBottom: "1rem" }}>
-                <label style = {{ display: "block", marginBottom: "4px", textAlign: "left" }}>Email:</label>
+            <div style = {{marginBottom: "1rem"}}>
+                <label style = {{display: "block", marginBottom: "4px", textAlign: "left"}}>Email:</label>
                 <input
                     type = "email"
                     value = {email}
                     onChange = {(e) => setEmail(e.target.value)}
-                    style = {{display: "block", width: "100%", padding: "8px", marginTop: "4px", boxSizing: "border-box" }}
+                    style = {{display: "block", width: "100%", padding: "8px", marginTop: "4px", boxSizing: "border-box"}}
                 />
             </div>
 
-            <div style = {{ marginBottom: "1rem" }}>
-                <label style = {{ display: "block", marginBottom: "4px", textAlign: "left" }}>Password:</label>
+            <div style = {{marginBottom: "1rem"}}>
+                <label style = {{display: "block", marginBottom: "4px", textAlign: "left"}}>Password:</label>
                 <input
                     type = "password"
                     value = {password}
                     onChange = {(e) => setPassword(e.target.value)}
-                    style = {{display: "block", width: "100%", padding: "8px", marginTop: "4px", boxSizing: "border-box" }}
+                    style = {{display: "block", width: "100%", padding: "8px", marginTop: "4px", boxSizing: "border-box"}}
                 />
             </div>
 
-            <div style = {{ textAlign: "center" }}>
-                <button type = "submit" style = {{ width: "100%", padding: "10px", justifyContent: "center" }}>
+            <div style = {{ textAlign: "center"}}>
+                <button type = "submit" style = {{width: "100%", padding: "10px", justifyContent: "center"}}>
                     Login
                 </button>
             </div>

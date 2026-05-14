@@ -1,6 +1,7 @@
 import { Routes, Route, Navigate } from "react-router-dom"
 import { useAuth } from "./context/AuthContext"
 import Login from "./pages/Login"
+import Cases from "./pages/Cases"
 
 // Forced login for all routes except /login if not authenticated
 function ProtectedRoute({ children }) {
@@ -16,11 +17,13 @@ export default function App() {
 
             <Route path = "/cases" element = {
                 <ProtectedRoute>
-                    <h1>Cases Page Soon</h1>
+                    <Cases />
                 </ProtectedRoute>
             } />
 
             {/* Add more routes later */}
+
+            
 
             <Route path = "/" element = {<Navigate to = "/cases" />} />
         </Routes>
