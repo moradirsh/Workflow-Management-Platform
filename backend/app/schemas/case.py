@@ -6,6 +6,7 @@ class CaseCreate(BaseModel):
     title: str
     description: str | None = None
     assignee_id: int | None = None
+    priority: str | None = None #low, medium, high
 
 # Same here, but to update
 class CaseUpdate(BaseModel):
@@ -13,6 +14,7 @@ class CaseUpdate(BaseModel):
     description: str | None = None
     status: str | None = None
     assignee_id: int | None = None
+    priority: str | None = None 
 
 # Data going out from database to frontend
 class CaseRead(BaseModel):
@@ -24,6 +26,7 @@ class CaseRead(BaseModel):
     category: str | None = None
     summary: str | None = None
     recommendation: str | None = None
+    priority: str | None = None
     created_at: datetime
     updated_at: datetime 
 

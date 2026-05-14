@@ -20,12 +20,15 @@ class CaseState(TypeDict):
     
 recommendation_prompt = ChatPromptTemplate.from_template("""
                                                          You are a case management assistant. Based on the following
-                                                         case details, provide 2-3 clear and actionable next steps.
+                                                         case details, exactly 3 actionable next steps.
                                                          Case Title: {title}
-                                                         Case Description: {description}
+                                                         Category: {category}
                                                          Summary: {summary}
-                                                         Respond with only the recommended next steps, numbered 1-3.
-                                                         Be specific and actionable.
+                                                         Format your responses exactly as follows, just the steps, but for each step include a brief title bolded:
+                                                         1. [First actionable step]
+                                                         2. [Second actionable step]
+                                                         3. [Third actionable step]
+                                                         Be specific and concise. Do not include any headers, titles or additional text.
                                                          """)
 
 recommendation_chain = recommendation_prompt | llm
@@ -33,7 +36,7 @@ recommendation_chain = recommendation_prompt | llm
 def generate_recommendation(state: CaseState) -> CaseState:
     response = recommendation_chain.invoke({
         "title": state["title"],
-        "description": state["description"],
+        "category": state["category"],
         "summary": state["summary"]
     })
     state["recommendation"] = response.content.strip()

@@ -9,8 +9,8 @@ from app.ai.recommendations import get_recommendation
 
 
 # Create a new case within db
-def create_case(db: Session, title: str, description: str | None = None, assignee_id: int | None = None):
-    case = Case(title = title, description = description, assignee_id = assignee_id)
+def create_case(db: Session, title: str, description: str | None = None, assignee_id: int | None = None, priority: str | None = None):
+    case = Case(title = title, description = description, assignee_id = assignee_id, priority = priority)
     db.add(case)
     db.commit()
     db.refresh(case)
@@ -43,3 +43,7 @@ def update_case(db: Session, case: Case, updates: dict[str, Any]):
     db.commit()
     db.refresh(case)
     return case
+
+def delete_case(db: Session, case: Case):
+    db.delete(case)
+    db.commit()
