@@ -6,7 +6,10 @@ import Cases from "./pages/Cases"
 // Forced login for all routes except /login if not authenticated
 function ProtectedRoute({ children }) {
     const { token } = useAuth()
-    return token ? children : <Navigate to = "/login" />
+    if (!token) {
+        return <Navigate to = "/login" replace />
+    }
+    return children
 }
 
 export default function App() {

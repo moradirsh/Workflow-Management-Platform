@@ -33,36 +33,36 @@ export default function Login() {
         <div style = {{maxWidth: "400px", margin: "60px auto", padding: "2rem"}}>
             <h2 style = {{textAlign: "center", marginBottom: "5rem"}}>CaseFlow Login</h2>
 
-        <p style = {{color: "red", textAlign: "center", fontSize: "16px", height: "20px", margin: "0 0 1rem 0"}}>{error || ""}</p>
-            
-        <form onSubmit = {handleLogin}>
-            <div style = {{marginBottom: "1rem"}}>
-                <label style = {{display: "block", marginBottom: "4px", textAlign: "left"}}>Email:</label>
-                <input
-                    type = "email"
-                    value = {email}
-                    onChange = {(e) => setEmail(e.target.value)}
-                    style = {{display: "block", width: "100%", padding: "8px", marginTop: "4px", boxSizing: "border-box"}}
-                />
-            </div>
+            <p style = {{color: "red", textAlign: "center", fontSize: "16px", height: "20px", margin: "0 0 1rem 0"}}>{error || ""}</p>
+                
+            <form onSubmit = {handleLogin}>
+                <div style = {{marginBottom: "1rem"}}>
+                    <label style = {{display: "block", marginBottom: "4px", textAlign: "left"}}>Email:</label>
+                    <input
+                        type = "email"
+                        value = {email}
+                        onChange = {(e) => setEmail(e.target.value)}
+                        style = {{display: "block", width: "100%", padding: "8px", marginTop: "4px", boxSizing: "border-box"}}
+                    />
+                </div>
 
-            <div style = {{marginBottom: "1rem"}}>
-                <label style = {{display: "block", marginBottom: "4px", textAlign: "left"}}>Password:</label>
-                <input
-                    type = "password"
-                    value = {password}
-                    onChange = {(e) => setPassword(e.target.value)}
-                    style = {{display: "block", width: "100%", padding: "8px", marginTop: "4px", boxSizing: "border-box"}}
-                />
-            </div>
+                <div style = {{marginBottom: "1rem"}}>
+                    <label style = {{display: "block", marginBottom: "4px", textAlign: "left"}}>Password:</label>
+                    <input
+                        type = "password"
+                        value = {password}
+                        onChange = {(e) => setPassword(e.target.value)}
+                        style = {{display: "block", width: "100%", padding: "8px", marginTop: "4px", boxSizing: "border-box"}}
+                    />
+                </div>
 
-            <div style = {{ textAlign: "center"}}>
-                <button type = "submit" style = {{width: "100%", padding: "10px", justifyContent: "center"}}>
-                    Login
-                </button>
-            </div>
-        </form>
-    </div>
+                <div style = {{ textAlign: "center"}}>
+                    <button type = "submit" style = {{width: "100%", padding: "10px", justifyContent: "center"}}>
+                        Login
+                    </button>
+                </div>
+            </form>
+        </div>
     )
 }
                 
