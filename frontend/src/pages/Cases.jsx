@@ -1,11 +1,13 @@
 import {useState, useEffect} from "react";
-import {getCases, updateCase, deleteCase, createCase} from "../api/cases";
+import {getCases, updateCase, deleteCase, createCase, getUsers} from "../api/cases";
 import ReactMarkdown from "react-markdown";
 import Sidebar from "../components/Sidebar"
 
 export default function Cases() {
     // Store list of cases, loaading state, and selected case for details view
+    const [users, setUsers] = useState([])
     const [cases, setCases] = useState([])
+    const [myCases, setMyCase] = useState(false)
     const [loading, setLoading] = useState(true)
     const [selectedCase, setSelectedCase] = useState(null)
     const [showForm, setShowForm] = useState(false)
@@ -17,14 +19,35 @@ export default function Cases() {
             try {
                 const response = await getCases();
                 setCases(response.data);
-            } catch (err) {
+            } 
+            catch (err) {
                 console.error("Error fetching cases:", err);
-            } finally {
+            } 
+            finally {
                 setLoading(false);
             }
         }
         fetchCases();
     }, [])
+
+    // Fetch all users
+    useEffect(() => {
+        const fetchData = async () => {
+            setLoading(true)
+            try {
+                const [casesRes, usersRes] = await Promise.all([getCases(myCases), getUsers()])
+                setCases(casesRes.data)
+                setUsers(usersRes.data)
+            } 
+            catch (err) {
+                console.error("Error fetching data:", err)
+            } 
+            finally {
+                setLoading(false)
+            }
+        }
+        fetchData()
+    }, [myCases])
 
     // Handle creating a new case
     const handleCreateCase = async () => {
@@ -33,7 +56,8 @@ export default function Cases() {
             setCases([...cases, response.data])
             setNewCase({title: "", description: "", priority: "low"})
             setShowForm(false)
-        } catch (err) {
+        } 
+        catch (err) {
             console.error("Error creating case:", err)
             alert("Failed to create case")
         }
@@ -51,11 +75,23 @@ export default function Cases() {
                 {/* Case list panel */}
                 <div style = {{width: "300px", minWidth: "300px", borderRight: "1px solid #2e303a", overflowY: "auto", backgroundColor: "#0f1117", display: "flex", flexDirection: "column"}}>
 
-                    {/* New case button */}
+                    {/* Case list header */}
                     <div style = {{padding: "12px 16px", borderBottom: "1px solid #2e303a", display: "flex", justifyContent: "space-between", alignItems: "center"}}>
-                        <span style = {{fontSize: "13px", fontWeight: "500", color: "#f3f4f6"}}>
-                            Cases
-                        </span>
+                        <div style = {{display: "flex", alignItems: "center", gap: "8px"}}>
+                            <span style = {{fontSize: "13px", fontWeight: "500", color: "#f3f4f6"}}>
+                                Cases
+                            </span>
+                            <button
+                                onClick = {() => setMyCase(!myCases)}
+                                style = {{
+                                    backgroundColor: myCases ? "#1e2030" : "#a78bfa", color: myCases ? "#9ca3af" : "#fff", border: "1px solid #2e303a", borderRadius: "4px", padding: "2px 8px",
+                                    fontSize: "11px",
+                                    cursor: "pointer"
+                                }}
+                            >
+                                {myCases ? "All Cases" : "My Cases"}
+                            </button>
+                        </div>
                         <button
                             onClick = {() => setShowForm(!showForm)}
                             style = {{backgroundColor: "#a78bfa", color: "#fff", border: "none", borderRadius: "4px", padding: "4px 10px", fontSize: "12px", cursor: "pointer"}}
@@ -104,21 +140,18 @@ export default function Cases() {
                             key = {c.id}
                             onClick = {() => setSelectedCase(c)}
                             style = {{
-                                padding: "12px 16px",
-                                borderBottom: "1px solid #2e303a",
-                                cursor: "pointer",
-                                backgroundColor: selectedCase?.id === c.id ? "#1e2030" : "transparent",
+                                padding: "14px 16px", borderBottom: "1px solid #2e303a", cursor: "pointer", backgroundColor: selectedCase?.id === c.id ? "#1e2030" : "transparent",
                                 borderLeft: selectedCase?.id === c.id ? "2px solid #a78bfa" : "2px solid transparent"
                             }}
                         >
-                            <div style = {{fontSize: "11px", color: "#6b7280", marginBottom: "4px"}}>
+                            <div style = {{fontSize: "11px", color: "#6b7280", marginBottom: "6px"}}>
                                 #{c.id}
                             </div>
-                            <div style = {{fontWeight: "500", fontSize: "13px", color: "#f3f4f6", marginBottom: "4px"}}>
+                            <div style = {{fontWeight: "500", fontSize: "13px", color: "#f3f4f6", marginBottom: "6px", lineHeight: "1.4"}}>
                                 {c.title}
                             </div>
-                            <div style = {{fontSize: "12px", color: "#9ca3af"}}>
-                                <span style = {{color: c.priority === "high" ? "#ef4444" : c.priority === "medium" ? "#f59e0b" : "#10b981"}}>
+                            <div style = {{fontSize: "12px", color: "#9ca3af", display: "flex", alignItems: "center", gap: "6px"}}>
+                                <span style = {{color: c.priority === "high" ? "#ef4444" : c.priority === "medium" ? "#f59e0b" : "#10b981", fontSize: "8px"}}>
                                     ●
                                 </span>
                                 {c.status} · {c.priority}
@@ -128,7 +161,7 @@ export default function Cases() {
                 </div>
 
                 {/* Case detail panel */}
-                <div style = {{flex: 1, padding: "2rem", overflowY: "auto"}}>
+                <div style = {{flex: 1, padding: "2rem 2.5rem", overflowY: "auto", backgroundColor: "#0f1117"}}>
                     {selectedCase ? (
                         <div>
                             {/* Title and delete button */}
@@ -170,14 +203,8 @@ export default function Cases() {
                                         }
                                     }}
                                     style = {{
-                                        backgroundColor: "#1e2030",
-                                        border: "1px solid #2e303a",
-                                        color: "#f3f4f6",
-                                        padding: "4px 8px",
-                                        borderRadius: "4px",
-                                        fontSize: "12px"
-                                    }}
-                                >
+                                        backgroundColor: "#1e2030", border: "1px solid #2e303a", color: "#f3f4f6", padding: "4px 8px", borderRadius: "4px", fontSize: "12px"}}
+                                    >
                                     <option value = "open">Open</option>
                                     <option value = "in progress">In Progress</option>
                                     <option value = "resolved">Resolved</option>
@@ -202,6 +229,33 @@ export default function Cases() {
                                 </span>
                             </div>
 
+                            {/* Asign to user */}
+                            <div style = {{marginTop: "1rem", marginBottom: "1rem"}}>
+                                <span style = {{fontSize: "12px", color: "#6b7280"}}>
+                                    Assigned to:
+                                </span>
+                                <select
+                                    value = {selectedCase.assignee_id || ""}
+                                    onChange = {async (e) => {
+                                        const assigneeId = e.target.value ? parseInt(e.target.value) : null
+                                        try {
+                                            await updateCase(selectedCase.id, {assignee_id: assigneeId})
+                                            setSelectedCase({...selectedCase, assignee_id: assigneeId})
+                                            setCases(prev => prev.map(c => c.id === selectedCase.id ? {...c, assignee_id: assigneeId} : c))
+                                        } 
+                                        catch (err) {
+                                            console.error("Error updating assignee:", err)
+                                        }
+                                    }}
+                                    style = {{marginLeft: "8px",  backgroundColor: "#1e2030", border: "1px solid #2e303a", color: "#f3f4f6", padding: "4px 8px", borderRadius: "4px", fontSize: "12px"}}>
+                                    <option value = "">Unassigned</option>
+                                    {users.map(u => (
+                                        <option key = {u.id} value = {u.id}>
+                                            {u.name}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
                             <hr style = {{borderColor: "#2e303a", margin: "1rem 0"}} />
 
                             {/* Description */}
@@ -225,7 +279,7 @@ export default function Cases() {
                                     <span style = {{fontSize: "12px", color: "#6b7280"}}>
                                         Classification
                                     </span>
-                                    <p style = {{fontSize: "12px", color: "#f3f4f6", marginTop: "4px"}}>
+                                    <p style = {{fontSize: "13px", color: "#f3f4f6", marginTop: "4px"}}>
                                         {selectedCase.category || "Not classified"}
                                     </p>
                                 </div>
@@ -235,7 +289,7 @@ export default function Cases() {
                                     <span style = {{fontSize: "12px", color: "#6b7280"}}>
                                         Summary
                                     </span>
-                                    <p style = {{fontSize: "12px", color: "#f3f4f6", marginTop: "4px", lineHeight: "1.5"}}>
+                                    <p style = {{fontSize: "13px", color: "#f3f4f6", marginTop: "4px", lineHeight: "1.5"}}>
                                         {selectedCase.summary || "No summary"}
                                     </p>
                                 </div>
@@ -245,14 +299,15 @@ export default function Cases() {
                                     <span style = {{fontSize: "12px", color: "#6b7280"}}>
                                         Recommendations
                                     </span>
-                                    <div style = {{fontSize: "12px", color: "#f3f4f6", marginTop: "4px", lineHeight: "1.6"}}>
+                                    <div style = {{fontSize: "13px", color: "#f3f4f6", marginTop: "8px", lineHeight: "1.8"}}>
                                         <ReactMarkdown
                                             components={{
                                                 ol: ({node, ...props}) => <ol style = {{paddingLeft: "13px", margin: "0"}} {...props} />, // for alignment of AI recommendations
                                                 ul: ({node, ...props}) => <ul style = {{paddingLeft: "13px", margin: "0"}} {...props} />,
+                                                li: ({node, ...props}) => <li style = {{marginBottom: "8px"}} {...props} />,
+                                                strong: ({node, ...props}) => <strong style = {{color: "#f3f4f6"}} {...props} />,
                                                 p: ({node, ...props}) => <p style = {{margin: "0"}} {...props} />
-                                            }}
-                                        >
+                                            }}>
                                             {selectedCase.recommendation || "No recommendations"}
                                         </ReactMarkdown>
                                     </div>

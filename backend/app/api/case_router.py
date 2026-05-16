@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 from typing import List
 from app.core.dependencies import get_current_user
 from app.models.user import User
+from app.models.case import Case
 
 from app.schemas.case import CaseCreate, CaseRead, CaseUpdate
 from app.services.case_service import create_case, get_cases, get_case, update_case, delete_case
@@ -19,8 +20,12 @@ def create_case_endpoint(case: CaseCreate, db: Session = Depends(get_db), curren
 
 # List all cases
 @router.get("/", response_model = List[CaseRead])
-def list_cases(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    return get_cases(db)
+def list_cases(db: Session = Depends(get_db), assigned_to_me: bool = False, current_user: User = Depends(get_current_user)):
+    
+    # If assigned is true, only return cases assigned to curr user
+    if assigned_to_me:
+        return db.query(Case).filter(Case.assignee_id == current_user.id).all()
+    return db.query(Case).all()
 
 # Get a single case by ID
 @router.get("/{case_id}", response_model = CaseRead)

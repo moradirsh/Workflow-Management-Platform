@@ -1,5 +1,6 @@
 from pydantic import BaseModel
 from datetime import datetime
+from pydantic import field_validator
 
 # Data coming in from frontend to create a case
 class CaseCreate(BaseModel):
@@ -7,6 +8,11 @@ class CaseCreate(BaseModel):
     description: str | None = None
     assignee_id: int | None = None
     priority: str | None = None #low, medium, high
+    
+    @field_validator("priority")
+    def lowercase_priority(cls, v):
+        return v.lower() if v else "low"
+    
 
 # Same here, but to update
 class CaseUpdate(BaseModel):

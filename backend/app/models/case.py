@@ -13,7 +13,7 @@ class Case(Base):
     assignee_id = Column(Integer, ForeignKey("users.id"), nullable = True)
     created_at = Column(DateTime(timezone = True), server_default = func.now())
     updated_at = Column(DateTime(timezone = True), server_default = func.now(), onupdate = func.now())
-    priority = Column(String, default = "medium")   # low, medium, high
+    priority = Column(String, default = "low")   # low, medium, high
     category = Column(String, nullable = True)       # Haiku handles this
     summary = Column(String, nullable = True)        # Haiku also handles this
     recommendation = Column(String, nullable = True) # Haiku also handles this

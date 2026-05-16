@@ -24,7 +24,8 @@ export default function Login() {
             const response = await login({email, password})
             loginUser(response.data.access_token) // Save token to context and localStorage
             navigate("/cases") // Redirect to cases page after login
-        } catch (err) {
+        } 
+        catch (err) {
             setError("Invalid email or password")
         }
     }
@@ -62,6 +63,17 @@ export default function Login() {
                     </button>
                 </div>
             </form>
+
+
+                <p style = {{textAlign: "center", marginTop: "1rem", fontSize: "13px", color: "#9ca3af"}}>
+                Don't have an account?{" "}
+                <span
+                    onClick = {() => navigate("/register")}
+                    style = {{color: "#a78bfa", cursor: "pointer"}}
+                >
+                    Register
+                </span>
+            </p>
         </div>
     )
 }
