@@ -7,6 +7,18 @@ const api = axios.create({
   }
 })
 
+
+// Forces return to login page when catching 401 err returned by backend
+api.interceptors.response.use((response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      localStorage.removeItem('token')
+      window.location.href = '/login'
+    }
+    return Promise.reject(error) // return the error for debugging purposes
+  }
+)
+
 // Auto attach JWT token to each request so backend knows user is authenticated each time
 api.interceptors.request.use(config => {
   const token = localStorage.getItem('token')

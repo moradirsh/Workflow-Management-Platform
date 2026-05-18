@@ -8,10 +8,10 @@ class ActivityLog(Base):
     __tablename__ = "activity_logs"
 
     id = Column(Integer, primary_key = True, index = True)
-    case_id = Column(Integer, ForeignKey("cases.id"), nullable = False)
+    case_id = Column(Integer, ForeignKey("cases.id", ondelete = "CASCADE"), nullable = False)
     user_id = Column(Integer, ForeignKey("users.id"), nullable = True)
-    action = Column(String, nullable = False)  # "case_created", "status_changed", "assigned"
-    details = Column(JSON, nullable = True)    # extra context e.g. "from": "open", "to": "closed"
+    action = Column(String, nullable = False)  # Case created part for status changes
+    details = Column(JSON, nullable = True)    # Extra content based on if case gets updated
     created_at = Column(DateTime(timezone = True), server_default = func.now())
 
     case = relationship("Case", back_populates = "activity_logs")

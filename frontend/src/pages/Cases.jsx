@@ -1,17 +1,19 @@
 import {useState, useEffect} from "react";
-import {getCases, updateCase, deleteCase, createCase, getUsers} from "../api/cases";
+import {getCases, updateCase, deleteCase, createCase, getUsers, getCaseActivity} from "../api/cases";
 import ReactMarkdown from "react-markdown";
 import Sidebar from "../components/Sidebar"
 
 export default function Cases() {
-    // Store list of cases, loaading state, and selected case for details view
+    // States for view
     const [users, setUsers] = useState([])
     const [cases, setCases] = useState([])
-    const [myCases, setMyCase] = useState(false)
+    const [myCases, setMyCases] = useState(false)
     const [loading, setLoading] = useState(true)
     const [selectedCase, setSelectedCase] = useState(null)
     const [showForm, setShowForm] = useState(false)
     const [newCase, setNewCase] = useState({title: "", description: "", priority: "low"})
+    const [search, setSearch] = useState("")
+    const [activity, setActivity] = useState([])
 
     // Fetch all cases when page loads
     useEffect(() => {
@@ -63,6 +65,21 @@ export default function Cases() {
         }
     }
 
+    // Fetch activity when case is selected
+    const handleSelectCase = async (c) => {
+        setSelectedCase(c)
+        try {
+            const res = await getCaseActivity(c.id)
+            setActivity(res.data)
+        } 
+            catch (err) {
+        console.error("Error fetching activity:", err)
+        }
+    }
+
+    // Filter cases by search 
+    const filteredCases = cases.filter(c => c.title.toLowerCase().includes(search.toLowerCase()))
+
     if (loading) {return <div>Loading...</div>}
 
     return (
@@ -82,7 +99,7 @@ export default function Cases() {
                                 Cases
                             </span>
                             <button
-                                onClick = {() => setMyCase(!myCases)}
+                                onClick = {() => setMyCases(!myCases)}
                                 style = {{
                                     backgroundColor: myCases ? "#1e2030" : "#a78bfa", color: myCases ? "#9ca3af" : "#fff", border: "1px solid #2e303a", borderRadius: "4px", padding: "2px 8px",
                                     fontSize: "11px",
@@ -98,6 +115,20 @@ export default function Cases() {
                         >
                             + New
                         </button>
+                    </div>
+
+                    <div style = {{padding: "8px 16px", borderBottom: "1px solid #2e303a"}}>
+                        <input
+                            type = "text"
+                            placeholder = "Search cases..."
+                            value = {search}
+                            onChange = {(e) => setSearch(e.target.value)}
+                            style = {{
+                                width: "100%", padding: "6px 10px", backgroundColor: "#1e2030", border: "1px solid #2e303a", borderRadius: "4px", fontSize: "12px",
+                                color: "#f3f4f6",
+                                boxSizing: "border-box"
+                            }}
+                        />
                     </div>
 
                     {/* Create case form */}
@@ -135,10 +166,10 @@ export default function Cases() {
                     )}
 
                     {/* Case items */}
-                    {cases.map((c) => (
+                    {filteredCases.map((c) => (
                         <div
                             key = {c.id}
-                            onClick = {() => setSelectedCase(c)}
+                            onClick = {() => handleSelectCase(c)}
                             style = {{
                                 padding: "14px 16px", borderBottom: "1px solid #2e303a", cursor: "pointer", backgroundColor: selectedCase?.id === c.id ? "#1e2030" : "transparent",
                                 borderLeft: selectedCase?.id === c.id ? "2px solid #a78bfa" : "2px solid transparent"
@@ -198,7 +229,13 @@ export default function Cases() {
                                             await updateCase(selectedCase.id, {status: newStatus})
                                             setSelectedCase({...selectedCase, status: newStatus})
                                             setCases(prev => prev.map(c => c.id === selectedCase.id ? {...c, status: newStatus} : c))
-                                        } catch (err) {
+                                                    
+                                            
+                                            const activityRes = await getCaseActivity(selectedCase.id)
+                                            setActivity(activityRes.data)
+                                            }
+                                        
+                                        catch (err) {
                                             console.error("Error updating case status:", err)
                                         }
                                     }}
@@ -239,10 +276,14 @@ export default function Cases() {
                                     onChange = {async (e) => {
                                         const assigneeId = e.target.value ? parseInt(e.target.value) : null
                                         try {
-                                            await updateCase(selectedCase.id, {assignee_id: assigneeId})
+                                            const res = await updateCase(selectedCase.id, {assignee_id: assigneeId})
                                             setSelectedCase({...selectedCase, assignee_id: assigneeId})
                                             setCases(prev => prev.map(c => c.id === selectedCase.id ? {...c, assignee_id: assigneeId} : c))
-                                        } 
+                                                
+                                            // Refetch activity after assignee update
+                                            const activityRes = await getCaseActivity(selectedCase.id)
+                                            setActivity(activityRes.data)
+                                        }
                                         catch (err) {
                                             console.error("Error updating assignee:", err)
                                         }
@@ -314,6 +355,34 @@ export default function Cases() {
                                 </div>
                             </div>
 
+                            {/* Activity log */}
+                            <div style = {{backgroundColor: "#1e2030", border: "1px solid #2e303a", borderRadius: "8px", padding: "1rem", marginBottom: "1rem"}}>
+                                <p style = {{fontSize: "11px", fontWeight: "500", color: "#6b7280", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "12px"}}>
+                                    Activity
+                                </p>
+                                {activity.length > 0 ? (
+                                    activity.map((log) => (
+                                        <div
+                                            key = {log.id}
+                                            style = {{display: "flex", gap: "10px", marginBottom: "10px", alignItems: "flex-start"}}
+                                        >
+                                            <div style = {{width: "8px", height: "8px", borderRadius: "50%", backgroundColor: "#a78bfa", marginTop: "4px", flexShrink: 0}} />
+                                            <div>
+                                                <p style = {{fontSize: "12px", color: "#d1d5db", marginBottom: "2px"}}> 
+                                                    {log.action.replace(/_/g, " ")}
+                                                </p>
+                                                <p style = {{fontSize: "11px", color: "#6b7280"}}>
+                                                    {new Date(log.created_at).toLocaleString()}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    ))
+                                ) : (
+                                    <p style = {{fontSize: "12px", color: "#6b7280"}}>
+                                        No activity yet
+                                    </p>
+                                )}
+                            </div>
                         </div>
                     ) : (
                         <div style = {{color: "#6b7280", marginTop: "2rem"}}>

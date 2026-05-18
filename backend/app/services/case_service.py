@@ -44,6 +44,7 @@ def update_case(db: Session, case: Case, updates: dict[str, Any]):
     db.refresh(case)
     return case
 
+# Remove case from db
 def delete_case(db: Session, case: Case):
     db.delete(case)
     db.commit()
