@@ -21,5 +21,5 @@ class Case(Base):
 
     # Will point to assigned user
     assignee = relationship("User", back_populates = "cases", foreign_keys = [assignee_id], uselist = False)
-    ai_analysis = relationship("AIAnalysis", back_populates = "case", uselist = False)
-    activity_logs = relationship("ActivityLog", back_populates = "case")
+    ai_analysis = relationship("AIAnalysis", back_populates = "case", uselist = False, cascade = "all, delete-orphan")
+    activity_logs = relationship("ActivityLog", back_populates = "case", cascade = "all, delete-orphan")

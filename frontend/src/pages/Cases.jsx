@@ -14,6 +14,7 @@ export default function Cases() {
     const [newCase, setNewCase] = useState({title: "", description: "", priority: "low"})
     const [search, setSearch] = useState("")
     const [activity, setActivity] = useState([])
+    const [selectedFile, setSelectedFile] = useState(null)
 
     // Fetch all cases when page loads
     useEffect(() => {
@@ -54,9 +55,10 @@ export default function Cases() {
     // Handle creating a new case
     const handleCreateCase = async () => {
         try {
-            const response = await createCase(newCase)
+            const response = await createCase(newCase, selectedFile)
             setCases([...cases, response.data])
             setNewCase({title: "", description: "", priority: "low"})
+            setSelectedFile(null)
             setShowForm(false)
         } 
         catch (err) {
@@ -156,6 +158,20 @@ export default function Cases() {
                                 <option value = "medium">Medium</option>
                                 <option value = "high">High</option>
                             </select>
+                            {/* File upload */}
+                            <div style = {{marginBottom: "8px"}}>
+                                <input
+                                    type = "file"
+                                    accept = ".pdf,.docx,.doc,.jpg,.jpeg,.png"
+                                    onChange = {(e) => setSelectedFile(e.target.files[0])}
+                                    style = {{display: "block", width: "100%", fontSize: "12px", color: "#9ca3af"}}
+                                />
+                                {selectedFile && (
+                                    <p style = {{fontSize: "11px", color: "#a78bfa", marginTop: "4px"}}>
+                                        {selectedFile.name}
+                                    </p>
+                                )}
+                            </div>
                             <button
                                 onClick = {handleCreateCase}
                                 style = {{width: "100%", padding: "6px", backgroundColor: "#a78bfa", color: "#fff", border: "none", borderRadius: "4px"}}
@@ -266,7 +282,7 @@ export default function Cases() {
                                 </span>
                             </div>
 
-                            {/* Asign to user */}
+                            {/* Assign to user */}
                             <div style = {{marginTop: "1rem", marginBottom: "1rem"}}>
                                 <span style = {{fontSize: "12px", color: "#6b7280"}}>
                                     Assigned to:
@@ -343,7 +359,7 @@ export default function Cases() {
                                     <div style = {{fontSize: "13px", color: "#f3f4f6", marginTop: "8px", lineHeight: "1.8"}}>
                                         <ReactMarkdown
                                             components={{
-                                                ol: ({node, ...props}) => <ol style = {{paddingLeft: "13px", margin: "0"}} {...props} />, // for alignment of AI recommendations
+                                                ol: ({node, ...props}) => <ol style = {{paddingLeft: "13px", margin: "0"}} {...props} />, // Componenets for alignment of AI recommendations
                                                 ul: ({node, ...props}) => <ul style = {{paddingLeft: "13px", margin: "0"}} {...props} />,
                                                 li: ({node, ...props}) => <li style = {{marginBottom: "8px"}} {...props} />,
                                                 strong: ({node, ...props}) => <strong style = {{color: "#f3f4f6"}} {...props} />,

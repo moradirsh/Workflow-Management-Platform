@@ -1,6 +1,6 @@
 # REST endpoints for creating, listing, retrieving, and updating cases.
 # It handles request validation and delegates business logic to case_service.
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
 from sqlalchemy.orm import Session
 from typing import List
 from app.core.dependencies import get_current_user
@@ -12,13 +12,20 @@ from app.schemas.activity_log import ActivityLogRead
 from app.services.case_service import create_case, get_cases, get_case, update_case, delete_case
 from app.core.database import get_db
 from app.services.activity_service import log_activity, get_case_activity
+from app.ai.file_extractor import extract_file_content
 
 router = APIRouter(prefix = "/cases", tags = ["Cases"])
 
 # Create a new case
 @router.post("/", response_model = CaseRead)
-def create_case_endpoint(case: CaseCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    new_case = create_case(db, case.title, case.description, case.assignee_id, case.priority)
+async def create_case_endpoint(title: str = Form(...), description: str | None = Form(None), assignee_id: int | None = Form(None), priority: str | None = Form(None), file: UploadFile | None = File(None), db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    
+    file_content = None
+    if file:
+        file_bytes = await file.read()
+        file_content = extract_file_content(file_bytes, file.filename)
+
+    new_case = create_case(db, title, description, assignee_id, priority, file_content)
     log_activity(db, new_case.id, current_user.id, "case_created", {"title": new_case.title})
     return new_case
 

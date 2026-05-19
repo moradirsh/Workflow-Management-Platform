@@ -9,16 +9,22 @@ from app.ai.recommendations import get_recommendation
 
 
 # Create a new case within db
-def create_case(db: Session, title: str, description: str | None = None, assignee_id: int | None = None, priority: str | None = None):
+def create_case(db: Session, title: str, description: str | None = None, assignee_id: int | None = None, priority: str | None = None, file_content: str | None = None):
     case = Case(title = title, description = description, assignee_id = assignee_id, priority = priority)
     db.add(case)
     db.commit()
     db.refresh(case)
     
-    # To auto classify category, summary, and recommendation after creation
-    if description:
-        category = classify_case(title, description)
-        summary = summarize_case(title, description)
+    # To auto classify category, summary, and recommendation after creation: Added on file content
+    if description or file_content:
+        combined_content = ""
+        if description:
+            combined_content += description
+        if file_content:
+            combined_content += f"\n\nFile content: \n{file_content}"
+        
+        category = classify_case(title, combined_content)
+        summary = summarize_case(title, combined_content)
         recommendation = get_recommendation(title, category, summary)
         case.category = category
         case.summary = summary
