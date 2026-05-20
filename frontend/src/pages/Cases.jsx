@@ -1,5 +1,5 @@
 import {useState, useEffect} from "react";
-import {getCases, updateCase, deleteCase, createCase, getUsers, getCaseActivity} from "../api/cases";
+import {getCases, updateCase, deleteCase, createCase, getUsers, getCaseActivity, downloadFile} from "../api/cases";
 import ReactMarkdown from "react-markdown";
 import Sidebar from "../components/Sidebar"
 
@@ -15,6 +15,7 @@ export default function Cases() {
     const [search, setSearch] = useState("")
     const [activity, setActivity] = useState([])
     const [selectedFile, setSelectedFile] = useState(null)
+    const [showActivity, setShowActivity] = useState(null)
 
     // Fetch all cases when page loads
     useEffect(() => {
@@ -70,6 +71,7 @@ export default function Cases() {
     // Fetch activity when case is selected
     const handleSelectCase = async (c) => {
         setSelectedCase(c)
+        setShowActivity(false)
         try {
             const res = await getCaseActivity(c.id)
             setActivity(res.data)
@@ -221,6 +223,9 @@ export default function Cases() {
                                 </h2>
                                 <button
                                     onClick = {async () => {
+                                        // Will be confirmation to delete case
+                                        const confirmed = window.confirm("Are you sure you want to delete this case? This action is irreversible.")
+                                        if (!confirmed) return
                                         try {
                                             await deleteCase(selectedCase.id)
                                             setCases(prev => prev.filter(c => c.id !== selectedCase.id))
@@ -291,6 +296,7 @@ export default function Cases() {
                                     value = {selectedCase.assignee_id || ""}
                                     onChange = {async (e) => {
                                         const assigneeId = e.target.value ? parseInt(e.target.value) : null
+                                        const assigneeName = users.find(u => u.id === assigneeId)?.name || "Unassigned"
                                         try {
                                             const res = await updateCase(selectedCase.id, {assignee_id: assigneeId})
                                             setSelectedCase({...selectedCase, assignee_id: assigneeId})
@@ -324,6 +330,40 @@ export default function Cases() {
                                     {selectedCase.description}
                                 </p>
                             </div>
+
+                            {/* When user attatches file */}
+                            {selectedCase.file_name && (
+                                <div style = {{backgroundColor: "#1e2030", border: "1px solid #2e303a", borderRadius: "8px", padding: "1rem", marginBottom: "1rem"}}>
+                                    <p style = {{fontSize: "11px", fontWeight: "500", color: "#6b7280", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "8px"}}>
+                                        Attached File
+                                    </p>
+                                    <div style = {{display: "flex", alignItems: "center", justifyContent: "space-between"}}>
+                                        <span style = {{fontSize: "13px", color: "#d1d5db"}}>
+                                            📄 {selectedCase.file_name}
+                                        </span>
+                                        <button
+                                            onClick = {async () => {
+                                                try {
+                                                    const res = await downloadFile(selectedCase.id)
+                                                    // Create a download link and click it
+                                                    const url = window.URL.createObjectURL(new Blob([res.data]))
+                                                    const link = document.createElement('a')
+                                                    link.href = url
+                                                    link.setAttribute('download', selectedCase.file_name)
+                                                    document.body.appendChild(link)
+                                                    link.click()
+                                                    link.remove()
+                                                } catch (err) {
+                                                    console.error("Error downloading file:", err)
+                                                }
+                                            }}
+                                            style = {{backgroundColor: "#a78bfa", color: "#fff", border: "none", borderRadius: "4px", padding: "4px 10px", fontSize: "12px", cursor: "pointer"}}
+                                        >
+                                            Download
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
 
                             {/* AI Augmentation background */}
                             <div style = {{backgroundColor: "#1e2030", border: "1px solid #7c3aed", borderRadius: "8px", padding: "1rem", marginBottom: "1rem"}}>
@@ -373,31 +413,53 @@ export default function Cases() {
 
                             {/* Activity log */}
                             <div style = {{backgroundColor: "#1e2030", border: "1px solid #2e303a", borderRadius: "8px", padding: "1rem", marginBottom: "1rem"}}>
-                                <p style = {{fontSize: "11px", fontWeight: "500", color: "#6b7280", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "12px"}}>
-                                    Activity
-                                </p>
-                                {activity.length > 0 ? (
-                                    activity.map((log) => (
-                                        <div
-                                            key = {log.id}
-                                            style = {{display: "flex", gap: "10px", marginBottom: "10px", alignItems: "flex-start"}}
-                                        >
-                                            <div style = {{width: "8px", height: "8px", borderRadius: "50%", backgroundColor: "#a78bfa", marginTop: "4px", flexShrink: 0}} />
-                                            <div>
-                                                <p style = {{fontSize: "12px", color: "#d1d5db", marginBottom: "2px"}}> 
-                                                    {log.action.replace(/_/g, " ")}
-                                                </p>
-                                                <p style = {{fontSize: "11px", color: "#6b7280"}}>
-                                                    {new Date(log.created_at).toLocaleString()}
-                                                </p>
-                                            </div>
-                                        </div>
-                                    ))
-                                ) : (
-                                    <p style = {{fontSize: "12px", color: "#6b7280"}}>
-                                        No activity yet
+                                {/* Clickable header */}
+                                <div
+                                    onClick = {() => setShowActivity(!showActivity)}
+                                    style = {{display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer", marginBottom: showActivity ? "12px" : "0"}}
+                                >
+                                    <p style = {{fontSize: "11px", fontWeight: "500", color: "#6b7280", textTransform: "uppercase", letterSpacing: "0.06em"}}>
+                                        Activity ({activity.length})
                                     </p>
-                                )}
+                                    <span style = {{fontSize: "11px", color: "#6b7280"}}>
+                                        {showActivity ? "▲" : "▼"}
+                                    </span>
+                                </div>
+                                {showActivity && (
+                                    activity.length > 0 ? (
+                                        activity.map((log) => (
+                                            <div
+                                                key = {log.id}
+                                                style = {{display: "flex", gap: "10px", marginBottom: "10px", alignItems: "flex-start"}}
+                                            >
+                                                <div style = {{width: "8px", height: "8px", borderRadius: "50%", backgroundColor: "#a78bfa", marginTop: "4px", flexShrink: 0}} />
+                                                <div>
+                                                    <p style = {{fontSize: "12px", color: "#d1d5db", marginBottom: "2px"}}> 
+                                                        {/* Alteration of activity logs displaying user changing user assignement, user changing status*/}
+                                                        {log.details?.changed_by && (
+                                                            <span style = {{color: "#a78bfa"}}>{log.details.changed_by} </span>
+                                                        )}
+                                                        {log.action.replace(/_/g, " ")}
+                                                        {log.details?.changes?.status && (
+                                                            <span> → <span style = {{color: "#a78bfa"}}>{log.details.changes.previous_status}</span> to <span style = {{color: "#a78bfa"}}>{log.details.changes.status}</span></span>
+                                                        )}
+                                                        {log.details?.changes?.assignee_id && (
+                                                            <span> → assigned to <span style = {{color: "#a78bfa"}}>{log.details.changes.assignee_name}</span></span>
+                                                        )}
+                                                        {log.details?.changes?.assignee_id === null && ` → unassigned`}
+                                                    </p>
+                                                    <p style = {{fontSize: "11px", color: "#6b7280"}}>
+                                                        {new Date(log.created_at).toLocaleString()}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        ))
+                                    ) : (
+                                        <p style = {{fontSize: "12px", color: "#6b7280"}}>
+                                            No activity yet
+                                        </p>
+                                        )
+                                    )}
                             </div>
                         </div>
                     ) : (
@@ -406,6 +468,6 @@ export default function Cases() {
                         </div>
                     )}
                 </div>
-            </div>     
+        </div>     
     )
 }

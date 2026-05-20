@@ -33,6 +33,8 @@ class CaseRead(BaseModel):
     summary: str | None = None
     recommendation: str | None = None
     priority: str | None = None
+    file_path: str | None = None
+    file_name: str | None = None
     created_at: datetime
     updated_at: datetime 
 

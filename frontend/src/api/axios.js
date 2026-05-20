@@ -12,8 +12,11 @@ const api = axios.create({
 api.interceptors.response.use((response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      localStorage.removeItem('token')
-      window.location.href = '/login'
+      const isLoginRequest = error.config.url.includes('/users/login') // Prevents redirection on incorrect credentials when logging in
+      if (!isLoginRequest) {
+        localStorage.removeItem('token')
+        window.location.href = '/login'
+      }
     }
     return Promise.reject(error) // return the error for debugging purposes
   }

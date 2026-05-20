@@ -18,6 +18,8 @@ class Case(Base):
     summary = Column(String, nullable = True)        # Haiku also handles this
     recommendation = Column(String, nullable = True) # Haiku also handles this
     created_by = Column(Integer, ForeignKey("users.id"), nullable = True)
+    file_path = Column(String, nullable = True)
+    file_name = Column(String, nullable = True)
 
     # Will point to assigned user
     assignee = relationship("User", back_populates = "cases", foreign_keys = [assignee_id], uselist = False)

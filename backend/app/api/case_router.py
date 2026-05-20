@@ -1,11 +1,14 @@
 # REST endpoints for creating, listing, retrieving, and updating cases.
 # It handles request validation and delegates business logic to case_service.
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
+from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
 from typing import List
 from app.core.dependencies import get_current_user
 from app.models.user import User
 from app.models.case import Case
+import os
+import uuid
 
 from app.schemas.case import CaseCreate, CaseRead, CaseUpdate
 from app.schemas.activity_log import ActivityLogRead
@@ -16,16 +19,27 @@ from app.ai.file_extractor import extract_file_content
 
 router = APIRouter(prefix = "/cases", tags = ["Cases"])
 
+UPLOAD_DIR = "uploads"
+os.makedirs(UPLOAD_DIR, exist_ok = True)
+
 # Create a new case
 @router.post("/", response_model = CaseRead)
 async def create_case_endpoint(title: str = Form(...), description: str | None = Form(None), assignee_id: int | None = Form(None), priority: str | None = Form(None), file: UploadFile | None = File(None), db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     
+    file_path = None
+    file_name = None
     file_content = None
     if file:
         file_bytes = await file.read()
         file_content = extract_file_content(file_bytes, file.filename)
+        
+        file_name = file.filename
+        unique_name = f"{uuid.uuid4()}_{file.filename}"
+        file_path = os.path.join(UPLOAD_DIR, unique_name)
+        with open(file_path, "wb") as f:
+            f.write(file_bytes)
 
-    new_case = create_case(db, title, description, assignee_id, priority, file_content)
+    new_case = create_case(db, title, description, assignee_id, priority, file_content, file_path, file_name)
     log_activity(db, new_case.id, current_user.id, "case_created", {"title": new_case.title})
     return new_case
 
@@ -35,8 +49,8 @@ def list_cases(db: Session = Depends(get_db), assigned_to_me: bool = False, curr
     
     # If assigned is true, only return cases assigned to curr user
     if assigned_to_me:
-        return db.query(Case).filter(Case.assignee_id == current_user.id).all()
-    return db.query(Case).all()
+        return db.query(Case).filter(Case.assignee_id == current_user.id).order_by(Case.created_at.desc()).all()
+    return db.query(Case).order_by(Case.created_at.desc()).all()
 
 # Get activity
 @router.get("/{case_id}/activity", response_model = List[ActivityLogRead])
@@ -58,8 +72,16 @@ def update_case_endpoint(case_id: int, updates: CaseUpdate, db: Session = Depend
     case = get_case(db, case_id)
     if not case:
         raise HTTPException(status_code = 404, detail = "Case not found")
+    details = updates.model_dump(exclude_unset = True)
+    if "status" in details:
+        details["previous_status"] = case.status
+    if "assignee_id" in details and details["assignee_id"]:
+        assignee = db.query(User).filter(User.id == details["assignee_id"]).first()
+        if assignee:
+            details["assignee_name"] = assignee.name
     updated = update_case(db, case, updates.model_dump(exclude_unset=True))
-    log_activity(db, case_id, current_user.id, "case_updated", updates.model_dump(exclude_unset=True))
+    log_activity(db, case_id, current_user.id, "case_updated", { 
+                                                                "changed_by": current_user.name, "changes": details})
     return updated
 
 
@@ -69,5 +91,14 @@ def delete_case_endpoint(case_id: int, db: Session = Depends(get_db), current_us
     case = get_case(db, case_id)
     if not case:
         raise HTTPException(status_code = 404, detail = "Case not found")
-    log_activity(db, case_id, current_user.id, "case_deleted", {"title": case.title})
     delete_case(db, case)
+
+# Download file when user attatchs file creating a case
+@router.get("/{case_id}/file")
+def download_file(case_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    case = get_case(db, case_id)
+    if not case:
+        raise HTTPException(status_code=404, detail="Case not found")
+    if not case.file_path or not os.path.exists(case.file_path):
+        raise HTTPException(status_code=404, detail="No file attached to this case")
+    return FileResponse(case.file_path, filename=case.file_name)

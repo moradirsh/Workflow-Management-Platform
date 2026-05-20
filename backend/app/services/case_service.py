@@ -9,8 +9,8 @@ from app.ai.recommendations import get_recommendation
 
 
 # Create a new case within db
-def create_case(db: Session, title: str, description: str | None = None, assignee_id: int | None = None, priority: str | None = None, file_content: str | None = None):
-    case = Case(title = title, description = description, assignee_id = assignee_id, priority = priority)
+def create_case(db: Session, title: str, description: str | None = None, assignee_id: int | None = None, priority: str | None = None, file_content: str | None = None, file_path: str | None = None, file_name: str | None = None):
+    case = Case(title = title, description = description, assignee_id = assignee_id, priority = priority, file_path = file_path, file_name = file_name)
     db.add(case)
     db.commit()
     db.refresh(case)
@@ -36,7 +36,7 @@ def create_case(db: Session, title: str, description: str | None = None, assigne
 
 # Return cases in list form
 def get_cases(db: Session, skip: int = 0, limit: int = 100):
-    return db.query(Case).offset(skip).limit(limit).all()
+    return db.query(Case).order_by(Case.created_at.desc()).offset(skip).limit(limit).all()
 
 # Return a case via ID
 def get_case(db: Session, case_id: int):

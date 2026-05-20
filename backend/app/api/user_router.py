@@ -8,6 +8,7 @@ from app.core.dependencies import get_current_user
 
 router = APIRouter(prefix = "/users", tags = ["Users"])
 
+# Register user
 @router.post("/register", response_model = UserRead)
 def register_user(user: UserCreate, db: Session = Depends(get_db)):
     existing = db.query(User).filter(User.email == user.email).first()
@@ -24,6 +25,7 @@ def register_user(user: UserCreate, db: Session = Depends(get_db)):
     db.refresh(new_user)
     return new_user
 
+# Handle login
 @router.post("/login", response_model = TokenResponse)
 def login(user: UserLogin, db: Session = Depends(get_db)):
     db_user = db.query(User).filter(User.email == user.email).first()
@@ -32,14 +34,17 @@ def login(user: UserLogin, db: Session = Depends(get_db)):
     token = create_access_token({"sub": str(db_user.id)})
     return {"access_token": token, "token_type": "bearer"}
 
+# Get a user
 @router.get("/", response_model = list[UserRead])
 def get_users(db: Session = Depends(get_db)):
     return db.query(User).all()
 
+# Get curr user
 @router.get("/me", response_model = UserRead)
 def get_me(current_user: User = Depends(get_current_user)):
     return current_user
 
+# For changing user's role, name, pass
 @router.put("/me", response_model = UserRead)
 def update_me(updates: UserUpdate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     if updates.name:
