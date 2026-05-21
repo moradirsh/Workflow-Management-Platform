@@ -16,3 +16,4 @@ class User(Base):
     # Cases assigned to the user
     cases = relationship("Case", back_populates = "assignee", foreign_keys = "[Case.assignee_id]")
     activity_logs = relationship("ActivityLog", back_populates = "user")
+    comments = relationship("Comment", back_populates = "author")

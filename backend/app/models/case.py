@@ -25,3 +25,4 @@ class Case(Base):
     assignee = relationship("User", back_populates = "cases", foreign_keys = [assignee_id], uselist = False)
     ai_analysis = relationship("AIAnalysis", back_populates = "case", uselist = False, cascade = "all, delete-orphan")
     activity_logs = relationship("ActivityLog", back_populates = "case", cascade = "all, delete-orphan")
+    comments = relationship("Comment", back_populates = "case", cascade = "all, delete-orphan")

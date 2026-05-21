@@ -7,6 +7,7 @@ from app.models.ai_analysis import AIAnalysis #type: ignore
 from app.models.activity_log import ActivityLog #type: ignore
 from app.api.user_router import router as user_router 
 from fastapi.middleware.cors import CORSMiddleware
+from app.api.comment_router import router as comment_router
 
 
 
@@ -28,6 +29,7 @@ def root():
 # Include the case API endpoints
 app.include_router(user_router)
 app.include_router(case_router.router)
+app.include_router(comment_router)
 
 # Auto create required postgres tables; if new columns are added, manually delete table and re-run
 Base.metadata.create_all(bind = engine)

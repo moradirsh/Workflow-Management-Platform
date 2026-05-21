@@ -1,5 +1,5 @@
 import {useState, useEffect} from "react";
-import {getCases, updateCase, deleteCase, createCase, getUsers, getCaseActivity, downloadFile} from "../api/cases";
+import {getCases, updateCase, deleteCase, createCase, getUsers, getCaseActivity, downloadFile, getComments, addComment} from "../api/cases";
 import ReactMarkdown from "react-markdown";
 import Sidebar from "../components/Sidebar"
 
@@ -16,6 +16,9 @@ export default function Cases() {
     const [activity, setActivity] = useState([])
     const [selectedFile, setSelectedFile] = useState(null)
     const [showActivity, setShowActivity] = useState(null)
+    const [comments, setComments] = useState([])
+    const [newComment, setNewComment] = useState("")
+    const [showComments, setShowComments] = useState(false)
 
     // Fetch all cases when page loads
     useEffect(() => {
@@ -68,14 +71,18 @@ export default function Cases() {
         }
     }
 
-    // Fetch activity when case is selected
+    // Updated: now fetches activity and comments
     const handleSelectCase = async (c) => {
         setSelectedCase(c)
         setShowActivity(false)
         try {
-            const res = await getCaseActivity(c.id)
-            setActivity(res.data)
-        } 
+            const [activityRes, commentsRes] = await Promise.all([
+            getCaseActivity(c.id),
+            getComments(c.id)
+            ])
+        setActivity(activityRes.data)
+        setComments(commentsRes.data)
+        }
             catch (err) {
         console.error("Error fetching activity:", err)
         }
@@ -339,7 +346,7 @@ export default function Cases() {
                                     </p>
                                     <div style = {{display: "flex", alignItems: "center", justifyContent: "space-between"}}>
                                         <span style = {{fontSize: "13px", color: "#d1d5db"}}>
-                                            📄 {selectedCase.file_name}
+                                            {selectedCase.file_name}
                                         </span>
                                         <button
                                             onClick = {async () => {
@@ -435,7 +442,7 @@ export default function Cases() {
                                                 <div style = {{width: "8px", height: "8px", borderRadius: "50%", backgroundColor: "#a78bfa", marginTop: "4px", flexShrink: 0}} />
                                                 <div>
                                                     <p style = {{fontSize: "12px", color: "#d1d5db", marginBottom: "2px"}}> 
-                                                        {/* Alteration of activity logs displaying user changing user assignement, user changing status*/}
+                                                        {/* Alteration of display for user changing user, user changing assignment progress */}
                                                         {log.details?.changed_by && (
                                                             <span style = {{color: "#a78bfa"}}>{log.details.changed_by} </span>
                                                         )}
@@ -461,6 +468,81 @@ export default function Cases() {
                                         )
                                     )}
                             </div>
+                                {/* Comments section */}
+                                <div style = {{backgroundColor: "#1e2030", border: "1px solid #2e303a", borderRadius: "8px", padding: "1rem", marginBottom: "1rem"}}>
+                                    
+                                    {/* Clickable header */}
+                                    <div
+                                        onClick = {() => setShowComments(!showComments)}
+                                        style = {{display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer", marginBottom: showComments ? "12px" : "0"}}
+                                    >
+                                        <p style = {{fontSize: "11px", fontWeight: "500", color: "#6b7280", textTransform: "uppercase", letterSpacing: "0.06em"}}>
+                                            Comments ({comments.length})
+                                        </p>
+                                        <span style = {{fontSize: "11px", color: "#6b7280"}}>
+                                            {showComments ? "▲" : "▼"}
+                                        </span>
+                                    </div>
+
+                                    {/* Only show when expanded */}
+                                    {showComments && (
+                                        <div>
+                                            {comments.length > 0 ? (
+                                                comments.map((comment) => (
+                                                    <div
+                                                        key = {comment.id}
+                                                        style = {{borderBottom: "1px solid #2e303a", paddingBottom: "10px", marginBottom: "10px"}}
+                                                    >
+                                                        <div style = {{display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px"}}>
+                                                            <span style = {{fontSize: "12px", color: "#a78bfa", fontWeight: "500"}}>
+                                                                {comment.author_name}
+                                                            </span>
+                                                            <span style = {{fontSize: "11px", color: "#6b7280"}}>
+                                                                {new Date(comment.created_at).toLocaleString()}
+                                                            </span>
+                                                        </div>
+                                                        <p style = {{fontSize: "13px", color: "#d1d5db", lineHeight: "1.5"}}>
+                                                            {comment.body}
+                                                        </p>
+                                                    </div>
+                                                ))
+                                            ) : (
+                                                <p style = {{fontSize: "12px", color: "#6b7280", marginBottom: "12px"}}>
+                                                    No comments yet
+                                                </p>
+                                            )}
+
+                                            {/* Add comment input */}
+                                            <div style = {{marginTop: "12px"}}>
+                                                <textarea
+                                                    placeholder = "Add a comment..."
+                                                    value = {newComment}
+                                                    onChange = {(e) => setNewComment(e.target.value)}
+                                                    style = {{
+                                                        display: "block", width: "100%", padding: "8px", backgroundColor: "#0f1117",
+                                                        border: "1px solid #2e303a", borderRadius: "4px", color: "#f3f4f6",
+                                                        fontSize: "13px", resize: "vertical", boxSizing: "border-box", marginBottom: "8px"
+                                                    }}
+                                                />
+                                                <button
+                                                    onClick = {async () => {
+                                                        if (!newComment.trim()) return
+                                                        try {
+                                                            const res = await addComment(selectedCase.id, {body: newComment})
+                                                            setComments([...comments, res.data])
+                                                            setNewComment("")
+                                                        } catch (err) {
+                                                            console.error("Error adding comment:", err)
+                                                        }
+                                                    }}
+                                                    style = {{backgroundColor: "#a78bfa", color: "#fff", border: "none", borderRadius: "4px", padding: "6px 16px", fontSize: "12px", cursor: "pointer"}}
+                                                >
+                                                    Post
+                                                </button>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
                         </div>
                     ) : (
                         <div style = {{color: "#6b7280", marginTop: "2rem"}}>

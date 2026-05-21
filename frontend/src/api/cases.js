@@ -4,6 +4,7 @@ import api from './axios'
 export const getCases = (assignedToMe = false) => api.get(`/cases${assignedToMe ? "?assigned_to_me=true" : ""}`)
 export const getCase = (id) => api.get(`/cases/${id}`)
 export const createCase = (data, file = null) => {
+
     // Use FormData since we now support file uploads
     const formData = new FormData()
     formData.append('title', data.title)
@@ -21,3 +22,5 @@ export const deleteCase = (id) => api.delete(`/cases/${id}`)
 export const getUsers = () => api.get(`/users`)
 export const getCaseActivity = (id) => api.get(`/cases/${id}/activity`)
 export const downloadFile = (id) => api.get(`/cases/${id}/file`, {responseType: 'blob'})
+export const getComments = (id) => api.get(`/cases/${id}/comments`)
+export const addComment = (id, data) => api.post(`/cases/${id}/comments`, data)
