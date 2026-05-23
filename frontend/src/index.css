@@ -1,3 +1,4 @@
+/* Basis of page */
 * {
   margin: 0;
   padding: 0;
@@ -41,4 +42,22 @@ h1, h2, h3, h4 {
 
 hr {
   border-color: #2e303a;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+    width: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: #0f1117;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #2e303a;
+    border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #4a4c5a;
 }

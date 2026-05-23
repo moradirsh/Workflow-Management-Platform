@@ -19,6 +19,7 @@ export default function Cases() {
     const [comments, setComments] = useState([])
     const [newComment, setNewComment] = useState("")
     const [showComments, setShowComments] = useState(false)
+    const [creating, setCreating] = useState(false)
 
     // Fetch all cases when page loads
     useEffect(() => {
@@ -58,6 +59,12 @@ export default function Cases() {
 
     // Handle creating a new case
     const handleCreateCase = async () => {
+        // Ensure title is provided as db cannot have it null
+        if (!newCase.title) {
+            alert("Title is required")
+            return 
+        }
+        setCreating(true)
         try {
             const response = await createCase(newCase, selectedFile)
             setCases([...cases, response.data])
@@ -68,6 +75,9 @@ export default function Cases() {
         catch (err) {
             console.error("Error creating case:", err)
             alert("Failed to create case")
+        }
+        finally {
+            setCreating(false)
         }
     }
 
@@ -183,9 +193,10 @@ export default function Cases() {
                             </div>
                             <button
                                 onClick = {handleCreateCase}
-                                style = {{width: "100%", padding: "6px", backgroundColor: "#a78bfa", color: "#fff", border: "none", borderRadius: "4px"}}
+                                disabled = {creating}
+                                style = {{width: "100%", padding: "6px", backgroundColor: creating ? "#6d5fa6" : "#a78bfa", color: "#fff", border: "none", borderRadius: "4px", cursor: creating ? "not-allowed" : "pointer", opacity: creating ? 0.8 : 1}}
                             >
-                                Create
+                                {creating ? "Creating... AI is analyzing" : "Create"}
                             </button>
                         </div>
                     )}
