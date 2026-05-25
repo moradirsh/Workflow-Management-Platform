@@ -5,6 +5,7 @@ import Cases from "./pages/Cases"
 import Dashboard from "./pages/Dashboard"
 import Register from "./pages/Register"
 import Settings from "./pages/Settings"
+import Landing from "./pages/Landing"
 
 // Forced login for all routes except /login if not authenticated
 function ProtectedRoute({ children }) {
@@ -21,6 +22,8 @@ export default function App() {
             <Route path = "/login" element = {<Login />} />
 
             <Route path = "/register" element = {<Register />} />
+
+            <Route path = "/landing" element = {<Landing />} />
 
             {/* Wrap all other routes with ProtectedRoute to require authentication */}
             <Route path = "/cases" element = {
