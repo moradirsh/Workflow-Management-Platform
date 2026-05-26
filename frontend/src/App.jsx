@@ -7,11 +7,11 @@ import Register from "./pages/Register"
 import Settings from "./pages/Settings"
 import Landing from "./pages/Landing"
 
-// Forced login for all routes except /login if not authenticated
+// Forced /landing if not auth by default
 function ProtectedRoute({ children }) {
     const { token } = useAuth()
     if (!token) {
-        return <Navigate to = "/login" replace />
+        return <Navigate to = "/landing" replace />
     }
     return children
 }

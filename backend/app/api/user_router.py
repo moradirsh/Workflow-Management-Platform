@@ -1,3 +1,4 @@
+# Alter user info, login, register
 from fastapi import APIRouter, Depends, HTTPException #type: ignore
 from sqlalchemy.orm import Session
 from app.schemas.user import UserCreate, UserRead, UserLogin, TokenResponse, UserUpdate

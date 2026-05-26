@@ -4,7 +4,7 @@ import ReactMarkdown from "react-markdown";
 import Sidebar from "../components/Sidebar"
 
 export default function Cases() {
-    // States for view
+    // States for view re-redner frontend when an update happens
     const [users, setUsers] = useState([])
     const [cases, setCases] = useState([])
     const [myCases, setMyCases] = useState(false)
