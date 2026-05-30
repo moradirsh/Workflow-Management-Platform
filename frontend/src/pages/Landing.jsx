@@ -44,7 +44,7 @@ export default function Landing() {
                         onClick = {() => navigate("/register")}
                         style = {{backgroundColor: "#a78bfa", color: "#fff", border: "none", borderRadius: "6px", padding: "12px 28px", cursor: "pointer", fontSize: "14px", fontWeight: "500"}}
                     >
-                        Get Started Free
+                        Get Started Here
                     </button>
                     <button
                         onClick = {() => navigate("/login")}
@@ -132,7 +132,7 @@ export default function Landing() {
                     CaseFlow
                 </span>
                 <span style = {{fontSize: "12px", color: "#6b7280"}}>
-                    Built with FastAPI, React, and Haiku
+                    Dont look here
                 </span>
             </div>
         </div>

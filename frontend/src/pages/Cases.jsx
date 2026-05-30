@@ -2,6 +2,7 @@ import {useState, useEffect} from "react";
 import {getCases, updateCase, deleteCase, createCase, getUsers, getCaseActivity, downloadFile, getComments, addComment} from "../api/cases";
 import ReactMarkdown from "react-markdown";
 import Sidebar from "../components/Sidebar"
+import {toast} from "sonner"
 
 export default function Cases() {
     // States for view re-redner frontend when an update happens
@@ -61,7 +62,7 @@ export default function Cases() {
     const handleCreateCase = async () => {
         // Ensure title is provided as db cannot have it null
         if (!newCase.title) {
-            alert("Title is required")
+            toast.error("Title is required")
             return 
         }
         setCreating(true)
@@ -71,10 +72,11 @@ export default function Cases() {
             setNewCase({title: "", description: "", priority: "low"})
             setSelectedFile(null)
             setShowForm(false)
+            toast.success("Case created - AI analysis complete")
         } 
         catch (err) {
             console.error("Error creating case:", err)
-            alert("Failed to create case")
+            toast.error("Failed to create case")
         }
         finally {
             setCreating(false)
@@ -202,30 +204,42 @@ export default function Cases() {
                     )}
 
                     {/* Case items */}
-                    {filteredCases.map((c) => (
-                        <div
-                            key = {c.id}
-                            onClick = {() => handleSelectCase(c)}
-                            style = {{
-                                padding: "14px 16px", borderBottom: "1px solid #2e303a", cursor: "pointer", backgroundColor: selectedCase?.id === c.id ? "#1e2030" : "transparent",
-                                borderLeft: selectedCase?.id === c.id ? "2px solid #a78bfa" : "2px solid transparent"
-                            }}
-                        >
-                            <div style = {{fontSize: "11px", color: "#6b7280", marginBottom: "6px"}}>
-                                #{c.id}
+                    {filteredCases.length > 0 ? (
+                        filteredCases.map((c) => (
+                            <div
+                                key = {c.id}
+                                onClick = {() => handleSelectCase(c)}
+                                style = {{
+                                    padding: "14px 16px", borderBottom: "1px solid #2e303a", cursor: "pointer", backgroundColor: selectedCase?.id === c.id ? "#1e2030" : "transparent",
+                                    borderLeft: selectedCase?.id === c.id ? "2px solid #a78bfa" : "2px solid transparent"
+                                }}
+                            >
+                                <div style = {{fontSize: "11px", color: "#6b7280", marginBottom: "6px"}}>
+                                    #{c.id}
+                                </div>
+                                <div style = {{fontWeight: "500", fontSize: "13px", color: "#f3f4f6", marginBottom: "6px", lineHeight: "1.4"}}>
+                                    {c.title}
+                                </div>
+                                <div style = {{fontSize: "12px", color: "#9ca3af", display: "flex", alignItems: "center", gap: "6px"}}>
+                                    <span style = {{color: c.priority === "high" ? "#ef4444" : c.priority === "medium" ? "#f59e0b" : "#10b981", fontSize: "8px"}}>
+                                        ●
+                                    </span>
+                                    {c.status} · {c.priority}
+                                </div>
                             </div>
-                            <div style = {{fontWeight: "500", fontSize: "13px", color: "#f3f4f6", marginBottom: "6px", lineHeight: "1.4"}}>
-                                {c.title}
-                            </div>
-                            <div style = {{fontSize: "12px", color: "#9ca3af", display: "flex", alignItems: "center", gap: "6px"}}>
-                                <span style = {{color: c.priority === "high" ? "#ef4444" : c.priority === "medium" ? "#f59e0b" : "#10b981", fontSize: "8px"}}>
-                                    ●
-                                </span>
-                                {c.status} · {c.priority}
-                            </div>
+                        ))
+                    ) : (
+                        <div style = {{padding: "2rem", textAlign: "center"}}>
+                            <p style = {{fontSize: "24px", marginBottom: "8px"}}>🜎</p>
+                            <p style = {{fontSize: "13px", color: "#6b7280", marginBottom: "4px"}}>
+                                {search ? "No cases match your search" : myCases ? "No cases assigned to you" : "No cases yet"}
+                            </p>
+                            <p style = {{fontSize: "12px", color: "#4a4c5a"}}>
+                                {search ? "Try a different search term" : "Click + New to create your first case"}
+                            </p>
                         </div>
-                    ))}
-                </div>
+                    )}
+                    </div>
 
                 {/* Case detail panel */}
                 <div style = {{flex: 1, padding: "2rem 2.5rem", overflowY: "auto", backgroundColor: "#0f1117"}}>
@@ -248,6 +262,7 @@ export default function Cases() {
                                             await deleteCase(selectedCase.id)
                                             setCases(prev => prev.filter(c => c.id !== selectedCase.id))
                                             setSelectedCase(null)
+                                            toast.success("Case deleted")
                                         } catch (err) {
                                             console.error("Error deleting case:", err)
                                         }
@@ -272,6 +287,7 @@ export default function Cases() {
                                             
                                             const activityRes = await getCaseActivity(selectedCase.id)
                                             setActivity(activityRes.data)
+                                            toast.success("Status Updated")
                                             }
                                         
                                         catch (err) {
@@ -323,6 +339,7 @@ export default function Cases() {
                                             // Refetch activity after assignee update
                                             const activityRes = await getCaseActivity(selectedCase.id)
                                             setActivity(activityRes.data)
+                                            toast.success("Assignee updated")
                                         }
                                         catch (err) {
                                             console.error("Error updating assignee:", err)
@@ -542,6 +559,7 @@ export default function Cases() {
                                                             const res = await addComment(selectedCase.id, {body: newComment})
                                                             setComments([...comments, res.data])
                                                             setNewComment("")
+                                                            toast.success("Comment posted")
                                                         } catch (err) {
                                                             console.error("Error adding comment:", err)
                                                         }
