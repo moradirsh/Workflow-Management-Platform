@@ -25,7 +25,6 @@ os.makedirs(UPLOAD_DIR, exist_ok = True)
 # Create a new case
 @router.post("/", response_model = CaseRead)
 async def create_case_endpoint(title: str = Form(...), description: str | None = Form(None), assignee_id: int | None = Form(None), priority: str | None = Form(None), file: UploadFile | None = File(None), db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    
     file_path = None
     file_name = None
     file_content = None
@@ -38,19 +37,23 @@ async def create_case_endpoint(title: str = Form(...), description: str | None =
         file_path = os.path.join(UPLOAD_DIR, unique_name)
         with open(file_path, "wb") as f:
             f.write(file_bytes)
-
+    
+    # Now pass in new case with file components
     new_case = create_case(db, title, description, assignee_id, priority, file_content, file_path, file_name)
     log_activity(db, new_case.id, current_user.id, "case_created", {"title": new_case.title})
     return new_case
 
-# List all cases
+# List all cases (now uses backend search instead of frontend)
 @router.get("/", response_model = List[CaseRead])
-def list_cases(db: Session = Depends(get_db), assigned_to_me: bool = False, current_user: User = Depends(get_current_user)):
-    
+def list_cases(db: Session = Depends(get_db), assigned_to_me: bool = False, search: str | None = None, current_user: User = Depends(get_current_user)):
+    query = db.query(Case)
+
     # If assigned is true, only return cases assigned to curr user
     if assigned_to_me:
-        return db.query(Case).filter(Case.assignee_id == current_user.id).order_by(Case.created_at.desc()).all()
-    return db.query(Case).order_by(Case.created_at.desc()).all()
+        query = query.filter(Case.assignee_id == current_user.id)
+    if search:
+        query = query.filter(Case.title.ilike(f"%{search}%") | Case.description.ilike(f"%{search}%"))
+    return query.order_by(Case.created_at.desc()).all()
 
 # Get activity
 @router.get("/{case_id}/activity", response_model = List[ActivityLogRead])

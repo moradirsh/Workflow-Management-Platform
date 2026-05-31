@@ -15,20 +15,22 @@ export default function Register() {
             // This will redirect once acc is registered
             navigate("/login")
         } catch (err) {
-            setError("Registration failed. Email may already be taken.")
+            setError("Registration failed.")
         }
     }
 
     return (
-        <div style = {{maxWidth: "400px", margin: "60px auto", padding: "2rem"}}>
+        <div style = {{width: "300px", margin: "60px auto", padding: "2rem"}}>
             <h2 style = {{textAlign: "center", marginBottom: "2rem"}}>
                 Create Account
             </h2>
 
             {/* Error message on fail */}
-            <p style = {{color: "red", textAlign: "center", height: "20px", margin: "0 0 1rem 0", fontSize: "14px", overflow: "hidden", whiteSpace: "nowrap"}}>
-                {error || ""}
-            </p>
+            <div style = {{height: "24px", overflow: "hidden", marginBottom: "1rem"}}>
+                <p style = {{color: "red", textAlign: "center", fontSize: "16px", overflow: "hidden", margin: "0", lineHeight: "1.4"}}>
+                    {error || ""}
+                </p>
+            </div>
 
             {/* Personal info fillout w submission*/}
             <div style = {{marginBottom: "1rem"}}>

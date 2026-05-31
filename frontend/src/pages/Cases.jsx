@@ -100,8 +100,21 @@ export default function Cases() {
         }
     }
 
-    // Filter cases by search 
-    const filteredCases = cases.filter(c => c.title.toLowerCase().includes(search.toLowerCase()))
+    // Now use backend search instead of frontend
+    useEffect(() => {
+        const fetchWithSearch = async () => {
+            try {
+                const res = await getCases(myCases, search)
+                setCases(res.data)
+            } catch (err) {
+                console.error("Error searching cases:", err)
+            }
+        }
+
+        // Debounce each time with 300ms so router isnt constantly spamming backend
+        const timer = setTimeout(fetchWithSearch, 300)
+        return () => clearTimeout(timer)
+    }, [search, myCases])
 
     if (loading) {return <div>Loading...</div>}
 
@@ -204,8 +217,8 @@ export default function Cases() {
                     )}
 
                     {/* Case items */}
-                    {filteredCases.length > 0 ? (
-                        filteredCases.map((c) => (
+                    {cases.length > 0 ? (
+                        cases.map((c) => (
                             <div
                                 key = {c.id}
                                 onClick = {() => handleSelectCase(c)}

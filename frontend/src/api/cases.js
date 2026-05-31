@@ -1,7 +1,7 @@
 import api from './axios'
 
 // Wrap api calls
-export const getCases = (assignedToMe = false) => api.get(`/cases${assignedToMe ? "?assigned_to_me=true" : ""}`)
+export const getCases = (assignedToMe = false, search = "") => api.get(`/cases${assignedToMe ? "?assigned_to_me=true" : ""}${search ? `${assignedToMe ? "&" : "?"}search=${search}` : ""}`)
 export const getCase = (id) => api.get(`/cases/${id}`)
 export const createCase = (data, file = null) => {
 

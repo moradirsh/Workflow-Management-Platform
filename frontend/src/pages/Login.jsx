@@ -17,8 +17,12 @@ export default function Login() {
 
     const handleLogin = async (e) => {
         e.preventDefault()
-        setError(null)
+        setError("")
 
+        if (!email || !password) {
+            setError("Email and password are required")
+            return
+        }
         try {
             // Send email and pass to database
             const response = await login({email, password})
@@ -31,10 +35,14 @@ export default function Login() {
     }
 
     return (
-        <div style = {{maxWidth: "400px", margin: "60px auto", padding: "2rem"}}>
+        <div style = {{width: "300px", margin: "60px auto", padding: "2rem", overflow: "hidden"}}>
             <h2 style = {{textAlign: "center", marginBottom: "5rem"}}>CaseFlow Login</h2>
 
-            <p style = {{color: "red", textAlign: "center", fontSize: "16px", height: "20px", margin: "0 0 1rem 0"}}>{error || ""}</p>
+            <div style = {{height: "24px", overflow: "hidden", marginBottom: "1rem"}}>
+                <p style = {{color: "red", textAlign: "center", fontSize: "16px", overflow: "hidden", margin: "0", lineHeight: "1.4"}}>
+                    {error || ""}
+                </p>
+            </div>
                 
             <form onSubmit = {handleLogin}>
                 <div style = {{marginBottom: "1rem"}}>
@@ -58,7 +66,7 @@ export default function Login() {
                 </div>
 
                 <div style = {{ textAlign: "center"}}>
-                    <button type = "submit" style = {{width: "100%", padding: "10px", justifyContent: "center"}}>
+                    <button type = "submit" style = {{width: "100%", padding: "10px", justifyContent: "center", backgroundColor: "#a78bfa"}}>
                         Login
                     </button>
                 </div>
