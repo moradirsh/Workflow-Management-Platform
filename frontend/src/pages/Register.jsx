@@ -3,12 +3,17 @@ import {useNavigate} from "react-router-dom"
 import {register} from "../api/auth"
 
 export default function Register() {
-    const [form, setForm] = useState({name: "", email: "", password: "", role: ""})
+    const [form, setForm] = useState({org_name: "", name: "", email: "", password: ""})
     const [error, setError] = useState("")
     const navigate = useNavigate()
 
     const handleRegister = async () => {
         setError("")
+        console.log("sending:", form)
+        if (!form.org_name || !form.name || !form.email || !form.password) {      
+              setError("All fields are required")
+              return
+        }
         try {
             // User registration data to backend
             await register(form)
@@ -24,15 +29,24 @@ export default function Register() {
             <h2 style = {{textAlign: "center", marginBottom: "2rem"}}>
                 Create Account
             </h2>
-
             {/* Error message on fail */}
             <div style = {{height: "24px", overflow: "hidden", marginBottom: "1rem"}}>
                 <p style = {{color: "red", textAlign: "center", fontSize: "16px", overflow: "hidden", margin: "0", lineHeight: "1.4"}}>
                     {error || ""}
                 </p>
             </div>
-
             {/* Personal info fillout w submission*/}
+            <div style = {{marginBottom: "1rem"}}>
+                <label style = {{display: "block", marginBottom: "4px", fontSize: "13px"}}>
+                    Organization Name
+                </label>
+                <input
+                    type = "text"
+                    value = {form.org_name}
+                    onChange = {(e) => setForm({...form, org_name: e.target.value})}
+                    style = {{display: "block", width: "100%", padding: "8px", boxSizing: "border-box"}}
+                />
+            </div>
             <div style = {{marginBottom: "1rem"}}>
                 <label style = {{display: "block", marginBottom: "4px", fontSize: "13px"}}>
                     Name
@@ -44,7 +58,6 @@ export default function Register() {
                     style = {{display: "block", width: "100%", padding: "8px", boxSizing: "border-box"}}
                 />
             </div>
-
             <div style = {{marginBottom: "1rem"}}>
                 <label style = {{display: "block", marginBottom: "4px", fontSize: "13px"}}>
                     Email
@@ -56,7 +69,6 @@ export default function Register() {
                     style = {{display: "block", width: "100%", padding: "8px", boxSizing: "border-box"}}
                 />
             </div>
-
             <div style = {{marginBottom: "1rem"}}>
                 <label style = {{display: "block", marginBottom: "4px", fontSize: "13px"}}>
                     Password
@@ -68,26 +80,12 @@ export default function Register() {
                     style = {{display: "block", width: "100%", padding: "8px", boxSizing: "border-box"}}
                 />
             </div>
-
-            <div style = {{marginBottom: "1.5rem"}}>
-                <label style = {{display: "block", marginBottom: "4px", fontSize: "13px"}}>
-                    Role
-                </label>
-                <input
-                    type = "text"
-                    value = {form.role}
-                    onChange = {(e) => setForm({...form, role: e.target.value})}
-                    style = {{display: "block", width: "100%", padding: "8px", boxSizing: "border-box"}}
-                />
-            </div>
-
             <button
                 onClick = {handleRegister}
                 style = {{display: "block", width: "100%", padding: "10px", backgroundColor: "#a78bfa", color: "#fff", border: "none", borderRadius: "4px", cursor: "pointer"}}
             >
                 Register
             </button>
-
             {/* Login link */}
             <p style = {{textAlign: "center", marginTop: "1rem", fontSize: "13px", color: "#9ca3af"}}>
                 Already have an account?{" "}

@@ -39,14 +39,14 @@ async def create_case_endpoint(title: str = Form(...), description: str | None =
             f.write(file_bytes)
     
     # Now pass in new case with file components
-    new_case = create_case(db, title, description, assignee_id, priority, file_content, file_path, file_name)
+    new_case = create_case(db, title, description, assignee_id, priority, file_content, file_path, file_name, current_user.org_id)
     log_activity(db, new_case.id, current_user.id, "case_created", {"title": new_case.title})
     return new_case
 
-# List all cases (now uses backend search instead of frontend)
+# List all cases based on org (now uses backend search instead of frontend)
 @router.get("/", response_model = List[CaseRead])
 def list_cases(db: Session = Depends(get_db), assigned_to_me: bool = False, search: str | None = None, current_user: User = Depends(get_current_user)):
-    query = db.query(Case)
+    query = db.query(Case).filter(Case.org_id == current_user.org_id)
 
     # If assigned is true, only return cases assigned to curr user
     if assigned_to_me:

@@ -92,17 +92,6 @@ export default function Settings() {
                             style = {{display: "block", width: "100%", padding: "8px", boxSizing: "border-box"}}
                         />
                     </div>
-                    <div style = {{marginBottom: "1rem"}}>
-                        <label style = {{display: "block", fontSize: "12px", color: "#6b7280", marginBottom: "4px"}}>
-                            Role
-                        </label>
-                        <input
-                            type = "text"
-                            value = {role}
-                            onChange = {(e) => setRole(e.target.value)}
-                            style = {{display: "block", width: "100%", padding: "8px", boxSizing: "border-box"}}
-                        />
-                    </div>
                 </div>
                 <div style = {{backgroundColor: "#1e2030", border: "1px solid #2e303a", borderRadius: "8px", padding: "1.5rem", marginBottom: "1.5rem", maxWidth: "500px"}}>
                     <p style = {{fontSize: "11px", fontWeight: "500", color: "#6b7280", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "1rem"}}>

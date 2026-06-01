@@ -6,6 +6,7 @@ import Dashboard from "./pages/Dashboard"
 import Register from "./pages/Register"
 import Settings from "./pages/Settings"
 import Landing from "./pages/Landing"
+import Users from "./pages/Users"
 
 // Forced /landing if not auth by default
 function ProtectedRoute({ children }) {
@@ -41,6 +42,12 @@ export default function App() {
             <Route path = "/settings" element = {
                 <ProtectedRoute>
                     <Settings />
+                </ProtectedRoute>
+            } />
+
+            <Route path = "/users" element = {
+                <ProtectedRoute>
+                    <Users />
                 </ProtectedRoute>
             } />
 

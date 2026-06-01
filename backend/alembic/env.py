@@ -28,6 +28,7 @@ from app.models.case import Case #type: ignore
 from app.models.ai_analysis import AIAnalysis #type: ignore
 from app.models.activity_log import ActivityLog #type: ignore
 from app.models.comment import Comment #type: ignore
+from app.models.organization import Organization #type: ignore
 
 target_metadata = Base.metadata
 

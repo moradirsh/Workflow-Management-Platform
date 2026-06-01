@@ -1,5 +1,5 @@
 # Represents a person in the system who can own cases, log activity, and receive assignments.
-from sqlalchemy import Column, Integer, String, DateTime, func
+from sqlalchemy import Column, Integer, String, DateTime, func, ForeignKey
 from sqlalchemy.orm import relationship
 from app.core.database import Base
 
@@ -12,8 +12,10 @@ class User(Base):
     email = Column(String, unique = True, nullable = False)
     role = Column(String, nullable = False)  
     created_at = Column(DateTime(timezone = True), server_default = func.now())
+    org_id = Column(Integer, ForeignKey("organizations.id"), nullable = True)
 
-    # Cases assigned to the user
+    # Cases assigned to the user based on org
     cases = relationship("Case", back_populates = "assignee", foreign_keys = "[Case.assignee_id]")
     activity_logs = relationship("ActivityLog", back_populates = "user")
     comments = relationship("Comment", back_populates = "author")
+    organization = relationship("Organization", back_populates = "users")

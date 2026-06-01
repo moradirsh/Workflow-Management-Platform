@@ -20,6 +20,7 @@ class Case(Base):
     created_by = Column(Integer, ForeignKey("users.id"), nullable = True)
     file_path = Column(String, nullable = True)
     file_name = Column(String, nullable = True)
+    org_id = Column(Integer, ForeignKey("organizations.id"), nullable = True)
 
     # Will point to assigned user
     assignee = relationship("User", back_populates = "cases", foreign_keys = [assignee_id], uselist = False)

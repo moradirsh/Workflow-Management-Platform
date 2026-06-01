@@ -41,6 +41,7 @@ export default function Sidebar() {
                 </p>
                 {navItem("Cases", "/cases")}
                 {navItem("Dashboard", "/dashboard")}
+                {navItem("Users", "/users")}
             </div>
 
             {/* System */}

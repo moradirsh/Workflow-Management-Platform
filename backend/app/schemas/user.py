@@ -29,9 +29,24 @@ class UserRead(BaseModel):
     model_config = {
         "from_attributes": True
     }
+    
 # Update user data
 class UserUpdate(BaseModel):
     name: str | None = None
     role: str | None = None
     current_password: str | None = None
     new_password: str | None = None
+    
+# Admin creating new user
+class AdminUserCreate(BaseModel):
+    name: str
+    email: str
+    password: str
+    role: str = "member"
+
+# Registration of org, creates admin in process
+class OrgRegister(BaseModel):
+    org_name: str
+    name: str
+    email: str
+    password: str
