@@ -61,62 +61,62 @@ export default function Settings() {
         <div style = {{display: "flex", height: "100vh"}}>
             {/* name, email, role, current pass, new pass in view */}
             <Sidebar />
-            <div style = {{flex: 1, padding: "2rem 2.5rem", overflowY: "auto", backgroundColor: "#0f1117"}}>
+            <div style = {{flex: 1, padding: "2rem 2.5rem", overflowY: "auto", backgroundColor: "#0a0a0a"}}>
 
-                <h2 style = {{marginBottom: "2rem", color: "#f3f4f6"}}>
+                <h2 style = {{marginBottom: "2rem", color: "#f5f5f5"}}>
                     Settings
                 </h2>
-                <div style = {{backgroundColor: "#1e2030", border: "1px solid #2e303a", borderRadius: "8px", padding: "1.5rem", marginBottom: "1.5rem", maxWidth: "500px"}}>
-                    <p style = {{fontSize: "11px", fontWeight: "500", color: "#6b7280", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "1rem"}}>
+                <div style = {{backgroundColor: "#141414", border: "1px solid #262626", borderRadius: "8px", padding: "1.5rem", marginBottom: "1.5rem", maxWidth: "500px"}}>
+                    <p style = {{fontSize: "11px", fontWeight: "500", color: "#a3a3a3", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "1rem"}}>
                         Profile
                     </p>
                     <div style = {{marginBottom: "1rem"}}>
-                        <label style = {{display: "block", fontSize: "12px", color: "#6b7280", marginBottom: "4px"}}>
+                        <label style = {{display: "block", fontSize: "12px", color: "#a3a3a3", marginBottom: "4px"}}>
                             Email
                         </label>
                         <input
                             type = "text"
                             value = {profile.email}
                             disabled
-                            style = {{display: "block", width: "100%", padding: "8px", boxSizing: "border-box", opacity: "0.5"}}
+                            style = {{display: "block", width: "100%", padding: "8px", boxSizing: "border-box", opacity: "0.5", backgroundColor: "#0a0a0a"}}
                         />
                     </div>
                     <div style = {{marginBottom: "1rem"}}>
-                        <label style = {{display: "block", fontSize: "12px", color: "#6b7280", marginBottom: "4px"}}>
+                        <label style = {{display: "block", fontSize: "12px", color: "#a3a3a3", marginBottom: "4px"}}>
                             Name
                         </label>
                         <input
                             type = "text"
                             value = {name}
                             onChange = {(e) => setName(e.target.value)}
-                            style = {{display: "block", width: "100%", padding: "8px", boxSizing: "border-box"}}
+                            style = {{display: "block", width: "100%", padding: "8px", boxSizing: "border-box", backgroundColor: "#0a0a0a"}}
                         />
                     </div>
                 </div>
-                <div style = {{backgroundColor: "#1e2030", border: "1px solid #2e303a", borderRadius: "8px", padding: "1.5rem", marginBottom: "1.5rem", maxWidth: "500px"}}>
-                    <p style = {{fontSize: "11px", fontWeight: "500", color: "#6b7280", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "1rem"}}>
+                <div style = {{backgroundColor: "#141414", border: "1px solid #262626", borderRadius: "8px", padding: "1.5rem", marginBottom: "1.5rem", maxWidth: "500px"}}>
+                    <p style = {{fontSize: "11px", fontWeight: "500", color: "#a3a3a3", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "1rem"}}>
                         Change Password
                     </p>
                     <div style = {{marginBottom: "1rem"}}>
-                        <label style = {{display: "block", fontSize: "12px", color: "#6b7280", marginBottom: "4px"}}>
+                        <label style = {{display: "block", fontSize: "12px", color: "#a3a3a3", marginBottom: "4px"}}>
                             Current Password
                         </label>
                         <input
                             type = "password"
                             value = {currentPassword}
                             onChange = {(e) => setCurrentPassword(e.target.value)}
-                            style = {{display: "block", width: "100%", padding: "8px", boxSizing: "border-box"}}
+                            style = {{display: "block", width: "100%", padding: "8px", boxSizing: "border-box", backgroundColor: "#0a0a0a"}}
                         />
                     </div>
                     <div style = {{marginBottom: "1rem"}}>
-                        <label style = {{display: "block", fontSize: "12px", color: "#6b7280", marginBottom: "4px"}}>
+                        <label style = {{display: "block", fontSize: "12px", color: "#a3a3a3", marginBottom: "4px"}}>
                             New Password
                         </label>
                         <input
                             type = "password"
                             value = {newPassword}
                             onChange = {(e) => setNewPassword(e.target.value)}
-                            style = {{display: "block", width: "100%", padding: "8px", boxSizing: "border-box"}}
+                            style = {{display: "block", width: "100%", padding: "8px", boxSizing: "border-box", backgroundColor: "#0a0a0a"}}
                         />
                     </div>
                 </div>
@@ -134,7 +134,7 @@ export default function Settings() {
                 )}
                 <button
                     onClick = {handleUpdate}
-                    style = {{backgroundColor: "#a78bfa", color: "#fff", border: "none", borderRadius: "4px", padding: "10px 24px", cursor: "pointer", fontSize: "13px"}}
+                    style = {{backgroundColor: "#0a0a0a", color: "#ffffff", border: "1px solid #262626", borderRadius: "4px", padding: "10px 24px", cursor: "pointer", fontSize: "13px"}}
                 >
                     Save Changes
                 </button>

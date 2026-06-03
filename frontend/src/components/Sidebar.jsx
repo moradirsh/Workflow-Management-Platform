@@ -16,9 +16,9 @@ export default function Sidebar() {
                 padding: "10px 16px",
                 cursor: "pointer",
                 fontSize: "13px",
-                borderLeft: location.pathname === path ? "2px solid #a78bfa" : "2px solid transparent",
-                color: location.pathname === path ? "#f3f4f6" : "#9ca3af",
-                backgroundColor: location.pathname === path ? "#1e2030" : "transparent",
+                borderLeft: location.pathname === path ? "2px solid #0a0a0afff" : "2px solid transparent",
+                color: location.pathname === path ? "#f5f5f5" : "#a3a3a3",
+                backgroundColor: location.pathname === path ? "#141414" : "transparent",
                 fontWeight: location.pathname === path ? "500" : "400"
             }}
         >
@@ -27,16 +27,16 @@ export default function Sidebar() {
 )
 
     return (
-        <div style = {{width: "200px", minWidth: "200px", height: "100vh", borderRight: "1px solid #2e303a", display: "flex", flexDirection: "column", backgroundColor: "#0f1117"}}>
+        <div style = {{width: "200px", minWidth: "200px", height: "100vh", borderRight: "1px solid #262626", display: "flex", flexDirection: "column", backgroundColor: "#0a0a0a"}}>
 
             {/* Logo */}
-            <div style = {{padding: "20px 16px", fontSize: "15px", fontWeight: "600", color: "#f3f4f6", borderBottom: "1px solid #2e303a", letterSpacing: "0.3px"}}>
+            <div style = {{padding: "20px 16px", fontSize: "15px", fontWeight: "600", color: "#f5f5f5", borderBottom: "1px solid #262626", letterSpacing: "0.3px"}}>
                 CaseFlow
             </div>
 
             {/* Main */}
             <div style = {{padding: "16px 0"}}>
-                <p style = {{padding: "4px 16px 8px", fontSize: "10px", color: "#6b7280", textTransform: "uppercase", letterSpacing: "0.08em"}}>
+                <p style = {{padding: "4px 16px 8px", fontSize: "10px", color: "#a3a3a3", textTransform: "uppercase", letterSpacing: "0.08em"}}>
                     Main
                 </p>
                 {navItem("Cases", "/cases")}
@@ -45,8 +45,8 @@ export default function Sidebar() {
             </div>
 
             {/* System */}
-            <div style = {{marginTop: "auto", borderTop: "1px solid #2e303a", padding: "16px 0"}}>
-                <p style = {{padding: "4px 16px 8px", fontSize: "10px", color: "#6b7280", textTransform: "uppercase", letterSpacing: "0.08em"}}>
+            <div style = {{marginTop: "auto", borderTop: "1px solid #262626", padding: "16px 0"}}>
+                <p style = {{padding: "4px 16px 8px", fontSize: "10px", color: "#a3a3a3", textTransform: "uppercase", letterSpacing: "0.08em"}}>
                     System
                 </p>
                 {navItem("Settings", "/settings")}

@@ -126,18 +126,18 @@ export default function Cases() {
                 <Sidebar />
 
                 {/* Case list panel */}
-                <div style = {{width: "300px", minWidth: "300px", borderRight: "1px solid #2e303a", overflowY: "auto", backgroundColor: "#0f1117", display: "flex", flexDirection: "column"}}>
+                <div style = {{width: "300px", minWidth: "300px", borderRight: "1px solid #262626", overflowY: "auto", backgroundColor: "#0a0a0a", display: "flex", flexDirection: "column"}}>
 
                     {/* Case list header */}
-                    <div style = {{padding: "12px 16px", borderBottom: "1px solid #2e303a", display: "flex", justifyContent: "space-between", alignItems: "center"}}>
+                    <div style = {{padding: "12px 16px", borderBottom: "1px solid #262626", display: "flex", justifyContent: "space-between", alignItems: "center"}}>
                         <div style = {{display: "flex", alignItems: "center", gap: "8px"}}>
-                            <span style = {{fontSize: "13px", fontWeight: "500", color: "#f3f4f6"}}>
+                            <span style = {{fontSize: "13px", fontWeight: "500", color: "#f5f5f5"}}>
                                 Cases
                             </span>
                             <button
                                 onClick = {() => setMyCases(!myCases)}
                                 style = {{
-                                    backgroundColor: myCases ? "#1e2030" : "#a78bfa", color: myCases ? "#9ca3af" : "#fff", border: "1px solid #2e303a", borderRadius: "4px", padding: "2px 8px",
+                                    backgroundColor: myCases ? "#141414" : "#ffffff", color: myCases ? "#a3a3a3" : "#0a0a0a", border: "1px solid #262626", borderRadius: "4px", padding: "2px 8px",
                                     fontSize: "11px",
                                     cursor: "pointer"
                                 }}
@@ -147,21 +147,21 @@ export default function Cases() {
                         </div>
                         <button
                             onClick = {() => setShowForm(!showForm)}
-                            style = {{backgroundColor: "#a78bfa", color: "#fff", border: "none", borderRadius: "4px", padding: "4px 10px", fontSize: "12px", cursor: "pointer"}}
+                            style = {{backgroundColor: "#ffffff", color: "#0a0a0a", border: "none", borderRadius: "4px", padding: "4px 10px", fontSize: "12px", cursor: "pointer"}}
                         >
                             + New
                         </button>
                     </div>
 
-                    <div style = {{padding: "8px 16px", borderBottom: "1px solid #2e303a"}}>
+                    <div style = {{padding: "8px 16px", borderBottom: "1px solid #262626"}}>
                         <input
                             type = "text"
                             placeholder = "Search cases..."
                             value = {search}
                             onChange = {(e) => setSearch(e.target.value)}
                             style = {{
-                                width: "100%", padding: "6px 10px", backgroundColor: "#1e2030", border: "1px solid #2e303a", borderRadius: "4px", fontSize: "12px",
-                                color: "#f3f4f6",
+                                width: "100%", padding: "6px 10px", backgroundColor: "#141414", border: "1px solid #262626", borderRadius: "4px", fontSize: "12px",
+                                color: "#f5f5f5",
                                 boxSizing: "border-box"
                             }}
                         />
@@ -169,24 +169,24 @@ export default function Cases() {
 
                     {/* Create case form */}
                     {showForm && (
-                        <div style = {{padding: "1rem", borderBottom: "1px solid #2e303a", backgroundColor: "#1e2030"}}>
+                        <div style = {{padding: "1rem", borderBottom: "1px solid #262626", backgroundColor: "#0a0a0a"}}>
                             <input
                                 type = "text"
                                 placeholder = "Title"
                                 value = {newCase.title}
                                 onChange = {(e) => setNewCase({...newCase, title: e.target.value})}
-                                style = {{display: "block", width: "100%", marginBottom: "8px", padding: "6px", boxSizing: "border-box"}}
+                                style = {{display: "block", width: "100%", marginBottom: "8px", padding: "6px", boxSizing: "border-box", backgroundColor: "#141414"}}
                             />
                             <textarea
                                 placeholder = "Description"
                                 value = {newCase.description}
                                 onChange = {(e) => setNewCase({...newCase, description: e.target.value})}
-                                style = {{display: "block", width: "100%", marginBottom: "8px", padding: "6px", boxSizing: "border-box", resize: "vertical"}}
+                                style = {{display: "block", width: "100%", marginBottom: "8px", padding: "6px", boxSizing: "border-box", resize: "vertical", backgroundColor: "#141414"}}
                             />
                             <select
                                 value = {newCase.priority}
                                 onChange = {(e) => setNewCase({...newCase, priority: e.target.value})}
-                                style = {{display: "block", width: "100%", marginBottom: "8px", padding: "6px", boxSizing: "border-box"}}
+                                style = {{display: "block", width: "100%", marginBottom: "8px", padding: "6px", boxSizing: "border-box", backgroundColor: "#141414"}}
                             >
                                 <option value = "low">Low</option>
                                 <option value = "medium">Medium</option>
@@ -198,10 +198,10 @@ export default function Cases() {
                                     type = "file"
                                     accept = ".pdf,.docx,.doc,.jpg,.jpeg,.png"
                                     onChange = {(e) => setSelectedFile(e.target.files[0])}
-                                    style = {{display: "block", width: "100%", fontSize: "12px", color: "#9ca3af"}}
+                                    style = {{display: "block", width: "100%", fontSize: "12px", color: "#a3a3a3", backgroundColor: "#141414"}}
                                 />
                                 {selectedFile && (
-                                    <p style = {{fontSize: "11px", color: "#a78bfa", marginTop: "4px"}}>
+                                    <p style = {{fontSize: "11px", color: "#0a0a0afff", marginTop: "4px"}}>
                                         {selectedFile.name}
                                     </p>
                                 )}
@@ -209,7 +209,7 @@ export default function Cases() {
                             <button
                                 onClick = {handleCreateCase}
                                 disabled = {creating}
-                                style = {{width: "100%", padding: "6px", backgroundColor: creating ? "#6d5fa6" : "#a78bfa", color: "#fff", border: "none", borderRadius: "4px", cursor: creating ? "not-allowed" : "pointer", opacity: creating ? 0.8 : 1}}
+                                style = {{width: "100%", padding: "6px", backgroundColor: creating ? "#525252" : "#ffffff", color: "#0a0a0a", border: "none", borderRadius: "4px", cursor: creating ? "not-allowed" : "pointer", opacity: creating ? 0.8 : 1}}
                             >
                                 {creating ? "Creating... AI is analyzing" : "Create"}
                             </button>
@@ -223,17 +223,17 @@ export default function Cases() {
                                 key = {c.id}
                                 onClick = {() => handleSelectCase(c)}
                                 style = {{
-                                    padding: "14px 16px", borderBottom: "1px solid #2e303a", cursor: "pointer", backgroundColor: selectedCase?.id === c.id ? "#1e2030" : "transparent",
-                                    borderLeft: selectedCase?.id === c.id ? "2px solid #a78bfa" : "2px solid transparent"
+                                    padding: "14px 16px", borderBottom: "1px solid #262626", cursor: "pointer", backgroundColor: selectedCase?.id === c.id ? "#141414" : "transparent",
+                                    borderLeft: selectedCase?.id === c.id ? "2px solid #0a0a0afff" : "2px solid transparent"
                                 }}
                             >
-                                <div style = {{fontSize: "11px", color: "#6b7280", marginBottom: "6px"}}>
+                                <div style = {{fontSize: "11px", color: "#a3a3a3", marginBottom: "6px"}}>
                                     #{c.id}
                                 </div>
-                                <div style = {{fontWeight: "500", fontSize: "13px", color: "#f3f4f6", marginBottom: "6px", lineHeight: "1.4"}}>
+                                <div style = {{fontWeight: "500", fontSize: "13px", color: "#f5f5f5", marginBottom: "6px", lineHeight: "1.4"}}>
                                     {c.title}
                                 </div>
-                                <div style = {{fontSize: "12px", color: "#9ca3af", display: "flex", alignItems: "center", gap: "6px"}}>
+                                <div style = {{fontSize: "12px", color: "#a3a3a3", display: "flex", alignItems: "center", gap: "6px"}}>
                                     <span style = {{color: c.priority === "high" ? "#ef4444" : c.priority === "medium" ? "#f59e0b" : "#10b981", fontSize: "8px"}}>
                                         ●
                                     </span>
@@ -244,10 +244,10 @@ export default function Cases() {
                     ) : (
                         <div style = {{padding: "2rem", textAlign: "center"}}>
                             <p style = {{fontSize: "24px", marginBottom: "8px"}}>🜎</p>
-                            <p style = {{fontSize: "13px", color: "#6b7280", marginBottom: "4px"}}>
+                            <p style = {{fontSize: "13px", color: "#a3a3a3", marginBottom: "4px"}}>
                                 {search ? "No cases match your search" : myCases ? "No cases assigned to you" : "No cases yet"}
                             </p>
-                            <p style = {{fontSize: "12px", color: "#4a4c5a"}}>
+                            <p style = {{fontSize: "12px", color: "#737373"}}>
                                 {search ? "Try a different search term" : "Click + New to create your first case"}
                             </p>
                         </div>
@@ -255,14 +255,14 @@ export default function Cases() {
                     </div>
 
                 {/* Case detail panel */}
-                <div style = {{flex: 1, padding: "2rem 2.5rem", overflowY: "auto", backgroundColor: "#0f1117"}}>
+                <div style = {{flex: 1, padding: "2rem 2.5rem", overflowY: "auto", backgroundColor: "#0a0a0a"}}>
                     {selectedCase ? (
                         <div>
                             {/* Title and delete button */}
                             <div style = {{display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px"}}>
                                 <h2 style = {{fontSize: "18px"}}>
                                     {selectedCase.title}
-                                    <span style = {{fontSize: "13px", color: "#6b7280", fontWeight: "400", marginLeft: "8px"}}>
+                                    <span style = {{fontSize: "13px", color: "#a3a3a3", fontWeight: "400", marginLeft: "8px"}}>
                                         #{selectedCase.id}
                                     </span>
                                 </h2>
@@ -308,7 +308,7 @@ export default function Cases() {
                                         }
                                     }}
                                     style = {{
-                                        backgroundColor: "#1e2030", border: "1px solid #2e303a", color: "#f3f4f6", padding: "4px 8px", borderRadius: "4px", fontSize: "12px"}}
+                                        backgroundColor: "#141414", border: "1px solid #262626", color: "#f5f5f5", padding: "4px 8px", borderRadius: "4px", fontSize: "12px"}}
                                     >
                                     <option value = "open">Open</option>
                                     <option value = "in progress">In Progress</option>
@@ -317,7 +317,7 @@ export default function Cases() {
 
                                 {/* Category badge */}
                                 {selectedCase.category && (
-                                    <span style = {{backgroundColor: "#1e2030", border: "1px solid #2e303a", color: "#9ca3af", padding: "4px 10px", borderRadius: "4px", fontSize: "12px"}}>
+                                    <span style = {{backgroundColor: "#141414", border: "1px solid #262626", color: "#a3a3a3", padding: "4px 10px", borderRadius: "4px", fontSize: "12px"}}>
                                         {selectedCase.category}
                                     </span>
                                 )}
@@ -336,7 +336,7 @@ export default function Cases() {
 
                             {/* Assign to user */}
                             <div style = {{marginTop: "1rem", marginBottom: "1rem"}}>
-                                <span style = {{fontSize: "12px", color: "#6b7280"}}>
+                                <span style = {{fontSize: "12px", color: "#a3a3a3"}}>
                                     Assigned to:
                                 </span>
                                 <select
@@ -358,7 +358,7 @@ export default function Cases() {
                                             console.error("Error updating assignee:", err)
                                         }
                                     }}
-                                    style = {{marginLeft: "8px",  backgroundColor: "#1e2030", border: "1px solid #2e303a", color: "#f3f4f6", padding: "4px 8px", borderRadius: "4px", fontSize: "12px"}}>
+                                    style = {{marginLeft: "8px",  backgroundColor: "#141414", border: "1px solid #262626", color: "#f5f5f5", padding: "4px 8px", borderRadius: "4px", fontSize: "12px"}}>
                                     <option value = "">Unassigned</option>
                                     {users.map(u => (
                                         <option key = {u.id} value = {u.id}>
@@ -367,26 +367,26 @@ export default function Cases() {
                                     ))}
                                 </select>
                             </div>
-                            <hr style = {{borderColor: "#2e303a", margin: "1rem 0"}} />
+                            <hr style = {{borderColor: "#262626", margin: "1rem 0"}} />
 
                             {/* Description */}
-                            <div style = {{backgroundColor: "#1e2030", border: "1px solid #2e303a", borderRadius: "8px", padding: "1rem", marginBottom: "1rem"}}>
-                                <p style = {{fontSize: "11px", fontWeight: "500", color: "#6b7280", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "8px"}}>
+                            <div style = {{backgroundColor: "#141414", border: "1px solid #262626", borderRadius: "8px", padding: "1rem", marginBottom: "1rem"}}>
+                                <p style = {{fontSize: "11px", fontWeight: "500", color: "#a3a3a3", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "8px"}}>
                                     Description
                                 </p>
-                                <p style = {{color: "#9ca3af", fontSize: "13px", lineHeight: "1.6"}}>
+                                <p style = {{color: "#a3a3a3", fontSize: "13px", lineHeight: "1.6"}}>
                                     {selectedCase.description}
                                 </p>
                             </div>
 
                             {/* When user attatches file */}
                             {selectedCase.file_name && (
-                                <div style = {{backgroundColor: "#1e2030", border: "1px solid #2e303a", borderRadius: "8px", padding: "1rem", marginBottom: "1rem"}}>
-                                    <p style = {{fontSize: "11px", fontWeight: "500", color: "#6b7280", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "8px"}}>
+                                <div style = {{backgroundColor: "#141414", border: "1px solid #262626", borderRadius: "8px", padding: "1rem", marginBottom: "1rem"}}>
+                                    <p style = {{fontSize: "11px", fontWeight: "500", color: "#a3a3a3", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "8px"}}>
                                         Attached File
                                     </p>
                                     <div style = {{display: "flex", alignItems: "center", justifyContent: "space-between"}}>
-                                        <span style = {{fontSize: "13px", color: "#d1d5db"}}>
+                                        <span style = {{fontSize: "13px", color: "#f5f5f5"}}>
                                             {selectedCase.file_name}
                                         </span>
                                         <button
@@ -405,7 +405,7 @@ export default function Cases() {
                                                     console.error("Error downloading file:", err)
                                                 }
                                             }}
-                                            style = {{backgroundColor: "#a78bfa", color: "#fff", border: "none", borderRadius: "4px", padding: "4px 10px", fontSize: "12px", cursor: "pointer"}}
+                                            style = {{backgroundColor: "#0a0a0a", color: "#ffffff", border: "1px solid #262626", borderRadius: "4px", padding: "4px 10px", fontSize: "12px", cursor: "pointer"}}
                                         >
                                             Download
                                         </button>
@@ -414,43 +414,43 @@ export default function Cases() {
                             )}
 
                             {/* AI Augmentation background */}
-                            <div style = {{backgroundColor: "#1e2030", border: "1px solid #7c3aed", borderRadius: "8px", padding: "1rem", marginBottom: "1rem"}}>
-                                <p style = {{fontSize: "11px", fontWeight: "500", color: "#a78bfa", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "12px"}}>
+                            <div style = {{backgroundColor: "#141414", border: "1px solid #262626", borderRadius: "8px", padding: "1rem", marginBottom: "1rem"}}>
+                                <p style = {{fontSize: "11px", fontWeight: "500", color: "#0a0a0afff", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "12px"}}>
                                     ⊙ AI Augmentation
                                 </p>
 
                                 {/* Classification */}
                                 <div style = {{marginBottom: "8px"}}>
-                                    <span style = {{fontSize: "12px", color: "#6b7280"}}>
+                                    <span style = {{fontSize: "12px", color: "#a3a3a3"}}>
                                         Classification
                                     </span>
-                                    <p style = {{fontSize: "13px", color: "#f3f4f6", marginTop: "4px"}}>
+                                    <p style = {{fontSize: "13px", color: "#f5f5f5", marginTop: "4px"}}>
                                         {selectedCase.category || "Not classified"}
                                     </p>
                                 </div>
 
                                 {/* Summary */}
                                 <div style = {{marginBottom: "8px"}}>
-                                    <span style = {{fontSize: "12px", color: "#6b7280"}}>
+                                    <span style = {{fontSize: "12px", color: "#a3a3a3"}}>
                                         Summary
                                     </span>
-                                    <p style = {{fontSize: "13px", color: "#f3f4f6", marginTop: "4px", lineHeight: "1.5"}}>
+                                    <p style = {{fontSize: "13px", color: "#f5f5f5", marginTop: "4px", lineHeight: "1.5"}}>
                                         {selectedCase.summary || "No summary"}
                                     </p>
                                 </div>
 
                                 {/* Recommendations */}
                                 <div>
-                                    <span style = {{fontSize: "12px", color: "#6b7280"}}>
+                                    <span style = {{fontSize: "12px", color: "#a3a3a3"}}>
                                         Recommendations
                                     </span>
-                                    <div style = {{fontSize: "13px", color: "#f3f4f6", marginTop: "8px", lineHeight: "1.8"}}>
+                                    <div style = {{fontSize: "13px", color: "#f5f5f5", marginTop: "8px", lineHeight: "1.8"}}>
                                         <ReactMarkdown
                                             components={{
                                                 ol: ({node, ...props}) => <ol style = {{paddingLeft: "13px", margin: "0"}} {...props} />, // Componenets for alignment of AI recommendations
                                                 ul: ({node, ...props}) => <ul style = {{paddingLeft: "13px", margin: "0"}} {...props} />,
                                                 li: ({node, ...props}) => <li style = {{marginBottom: "8px"}} {...props} />,
-                                                strong: ({node, ...props}) => <strong style = {{color: "#f3f4f6"}} {...props} />,
+                                                strong: ({node, ...props}) => <strong style = {{color: "#f5f5f5"}} {...props} />,
                                                 p: ({node, ...props}) => <p style = {{margin: "0"}} {...props} />
                                             }}>
                                             {selectedCase.recommendation || "No recommendations"}
@@ -460,16 +460,16 @@ export default function Cases() {
                             </div>
 
                             {/* Activity log */}
-                            <div style = {{backgroundColor: "#1e2030", border: "1px solid #2e303a", borderRadius: "8px", padding: "1rem", marginBottom: "1rem"}}>
+                            <div style = {{backgroundColor: "#141414", border: "1px solid #262626", borderRadius: "8px", padding: "1rem", marginBottom: "1rem"}}>
                                 {/* Clickable header */}
                                 <div
                                     onClick = {() => setShowActivity(!showActivity)}
                                     style = {{display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer", marginBottom: showActivity ? "12px" : "0"}}
                                 >
-                                    <p style = {{fontSize: "11px", fontWeight: "500", color: "#6b7280", textTransform: "uppercase", letterSpacing: "0.06em"}}>
+                                    <p style = {{fontSize: "11px", fontWeight: "500", color: "#a3a3a3", textTransform: "uppercase", letterSpacing: "0.06em"}}>
                                         Activity ({activity.length})
                                     </p>
-                                    <span style = {{fontSize: "11px", color: "#6b7280"}}>
+                                    <span style = {{fontSize: "11px", color: "#a3a3a3"}}>
                                         {showActivity ? "▲" : "▼"}
                                     </span>
                                 </div>
@@ -480,47 +480,47 @@ export default function Cases() {
                                                 key = {log.id}
                                                 style = {{display: "flex", gap: "10px", marginBottom: "10px", alignItems: "flex-start"}}
                                             >
-                                                <div style = {{width: "8px", height: "8px", borderRadius: "50%", backgroundColor: "#a78bfa", marginTop: "4px", flexShrink: 0}} />
+                                                <div style = {{width: "8px", height: "8px", borderRadius: "50%", backgroundColor: "#0a0a0afff", marginTop: "4px", flexShrink: 0}} />
                                                 <div>
-                                                    <p style = {{fontSize: "12px", color: "#d1d5db", marginBottom: "2px"}}> 
+                                                    <p style = {{fontSize: "12px", color: "#f5f5f5", marginBottom: "2px"}}> 
                                                         {/* Alteration of display for user changing user, user changing assignment progress */}
                                                         {log.details?.changed_by && (
-                                                            <span style = {{color: "#a78bfa"}}>{log.details.changed_by} </span>
+                                                            <span style = {{color: "#0a0a0afff"}}>{log.details.changed_by} </span>
                                                         )}
                                                         {log.action.replace(/_/g, " ")}
                                                         {log.details?.changes?.status && (
-                                                            <span> → <span style = {{color: "#a78bfa"}}>{log.details.changes.previous_status}</span> to <span style = {{color: "#a78bfa"}}>{log.details.changes.status}</span></span>
+                                                            <span> → <span style = {{color: "#0a0a0afff"}}>{log.details.changes.previous_status}</span> to <span style = {{color: "#0a0a0afff"}}>{log.details.changes.status}</span></span>
                                                         )}
                                                         {log.details?.changes?.assignee_id && (
-                                                            <span> → assigned to <span style = {{color: "#a78bfa"}}>{log.details.changes.assignee_name}</span></span>
+                                                            <span> → assigned to <span style = {{color: "#0a0a0afff"}}>{log.details.changes.assignee_name}</span></span>
                                                         )}
                                                         {log.details?.changes?.assignee_id === null && ` → unassigned`}
                                                     </p>
-                                                    <p style = {{fontSize: "11px", color: "#6b7280"}}>
+                                                    <p style = {{fontSize: "11px", color: "#a3a3a3"}}>
                                                         {new Date(log.created_at).toLocaleString()}
                                                     </p>
                                                 </div>
                                             </div>
                                         ))
                                     ) : (
-                                        <p style = {{fontSize: "12px", color: "#6b7280"}}>
+                                        <p style = {{fontSize: "12px", color: "#a3a3a3"}}>
                                             No activity yet
                                         </p>
                                         )
                                     )}
                             </div>
                                 {/* Comments section */}
-                                <div style = {{backgroundColor: "#1e2030", border: "1px solid #2e303a", borderRadius: "8px", padding: "1rem", marginBottom: "1rem"}}>
+                                <div style = {{backgroundColor: "#141414", border: "1px solid #262626", borderRadius: "8px", padding: "1rem", marginBottom: "1rem"}}>
                                     
                                     {/* Clickable header */}
                                     <div
                                         onClick = {() => setShowComments(!showComments)}
                                         style = {{display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer", marginBottom: showComments ? "12px" : "0"}}
                                     >
-                                        <p style = {{fontSize: "11px", fontWeight: "500", color: "#6b7280", textTransform: "uppercase", letterSpacing: "0.06em"}}>
+                                        <p style = {{fontSize: "11px", fontWeight: "500", color: "#a3a3a3", textTransform: "uppercase", letterSpacing: "0.06em"}}>
                                             Comments ({comments.length})
                                         </p>
-                                        <span style = {{fontSize: "11px", color: "#6b7280"}}>
+                                        <span style = {{fontSize: "11px", color: "#a3a3a3"}}>
                                             {showComments ? "▲" : "▼"}
                                         </span>
                                     </div>
@@ -532,23 +532,23 @@ export default function Cases() {
                                                 comments.map((comment) => (
                                                     <div
                                                         key = {comment.id}
-                                                        style = {{borderBottom: "1px solid #2e303a", paddingBottom: "10px", marginBottom: "10px"}}
+                                                        style = {{borderBottom: "1px solid #262626", paddingBottom: "10px", marginBottom: "10px"}}
                                                     >
                                                         <div style = {{display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px"}}>
-                                                            <span style = {{fontSize: "12px", color: "#a78bfa", fontWeight: "500"}}>
+                                                            <span style = {{fontSize: "12px", color: "#0a0a0afff", fontWeight: "500"}}>
                                                                 {comment.author_name}
                                                             </span>
-                                                            <span style = {{fontSize: "11px", color: "#6b7280"}}>
+                                                            <span style = {{fontSize: "11px", color: "#a3a3a3"}}>
                                                                 {new Date(comment.created_at).toLocaleString()}
                                                             </span>
                                                         </div>
-                                                        <p style = {{fontSize: "13px", color: "#d1d5db", lineHeight: "1.5"}}>
+                                                        <p style = {{fontSize: "13px", color: "#f5f5f5", lineHeight: "1.5"}}>
                                                             {comment.body}
                                                         </p>
                                                     </div>
                                                 ))
                                             ) : (
-                                                <p style = {{fontSize: "12px", color: "#6b7280", marginBottom: "12px"}}>
+                                                <p style = {{fontSize: "12px", color: "#a3a3a3", marginBottom: "12px"}}>
                                                     No comments yet
                                                 </p>
                                             )}
@@ -560,8 +560,8 @@ export default function Cases() {
                                                     value = {newComment}
                                                     onChange = {(e) => setNewComment(e.target.value)}
                                                     style = {{
-                                                        display: "block", width: "100%", padding: "8px", backgroundColor: "#0f1117",
-                                                        border: "1px solid #2e303a", borderRadius: "4px", color: "#f3f4f6",
+                                                        display: "block", width: "100%", padding: "8px", backgroundColor: "#0a0a0a",
+                                                        border: "1px solid #262626", borderRadius: "4px", color: "#f5f5f5",
                                                         fontSize: "13px", resize: "vertical", boxSizing: "border-box", marginBottom: "8px"
                                                     }}
                                                 />
@@ -577,7 +577,7 @@ export default function Cases() {
                                                             console.error("Error adding comment:", err)
                                                         }
                                                     }}
-                                                    style = {{backgroundColor: "#a78bfa", color: "#fff", border: "none", borderRadius: "4px", padding: "6px 16px", fontSize: "12px", cursor: "pointer"}}
+                                                    style = {{backgroundColor: "#0a0a0a", color: "#ffffff", border: "1px solid #262626", borderRadius: "4px", padding: "6px 16px", fontSize: "12px", cursor: "pointer"}}
                                                 >
                                                     Post
                                                 </button>
@@ -587,7 +587,7 @@ export default function Cases() {
                                 </div>
                         </div>
                     ) : (
-                        <div style = {{color: "#6b7280", marginTop: "2rem"}}>
+                        <div style = {{color: "#a3a3a3", marginTop: "2rem"}}>
                             Select a case to view details
                         </div>
                     )}
