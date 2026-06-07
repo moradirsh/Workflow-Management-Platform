@@ -71,6 +71,24 @@ class AdminUserCreate(BaseModel):
         if not any(c in "!@#$%^&*()_+-=[]{}|;':,.<>?/" for c in v):
             raise Error("Password must contain at least one special character")
         return v
+    
+class AdminUserUpdate(BaseModel):
+    name: str
+    email: str
+    role: str = "member"
+    password: str | None = None
+
+    @field_validator("password")
+    def password_strength(cls, v):
+        if v is None:
+            return v
+        if len(v) < 8:
+            raise ValueError("Password must be at least 8 characters")
+        if not any(c.isupper() for c in v):
+            raise ValueError("Password must contain at least one uppercase letter")
+        if not any(c.isdigit() for c in v):
+            raise ValueError("Password must contain at least one number")
+        return v
 
 # Registration of org, creates admin in process
 class OrgRegister(BaseModel):

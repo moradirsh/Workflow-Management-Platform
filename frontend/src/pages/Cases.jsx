@@ -95,8 +95,8 @@ export default function Cases() {
         setActivity(activityRes.data)
         setComments(commentsRes.data)
         }
-            catch (err) {
-        console.error("Error fetching activity:", err)
+        catch (err) {
+            console.error("Error fetching activity:", err)
         }
     }
 
@@ -106,7 +106,8 @@ export default function Cases() {
             try {
                 const res = await getCases(myCases, search)
                 setCases(res.data)
-            } catch (err) {
+            } 
+            catch (err) {
                 console.error("Error searching cases:", err)
             }
         }
@@ -137,7 +138,7 @@ export default function Cases() {
                             <button
                                 onClick = {() => setMyCases(!myCases)}
                                 style = {{
-                                    backgroundColor: myCases ? "#141414" : "#ffffff", color: myCases ? "#a3a3a3" : "#0a0a0a", border: "1px solid #262626", borderRadius: "4px", padding: "2px 8px",
+                                    backgroundColor: myCases ? "#ffffff" : "#ffffff", color: myCases ? "#0a0a0a" : "#0a0a0a", border: "1px solid #262626", borderRadius: "4px", padding: "2px 8px",
                                     fontSize: "11px",
                                     cursor: "pointer"
                                 }}
@@ -405,7 +406,7 @@ export default function Cases() {
                                                     console.error("Error downloading file:", err)
                                                 }
                                             }}
-                                            style = {{backgroundColor: "#0a0a0a", color: "#ffffff", border: "1px solid #262626", borderRadius: "4px", padding: "4px 10px", fontSize: "12px", cursor: "pointer"}}
+                                            style = {{backgroundColor: "#ffffff", color: "#0a0a0a", border: "1px solid #262626", borderRadius: "4px", padding: "4px 10px", fontSize: "12px", cursor: "pointer"}}
                                         >
                                             Download
                                         </button>
@@ -577,7 +578,7 @@ export default function Cases() {
                                                             console.error("Error adding comment:", err)
                                                         }
                                                     }}
-                                                    style = {{backgroundColor: "#0a0a0a", color: "#ffffff", border: "1px solid #262626", borderRadius: "4px", padding: "6px 16px", fontSize: "12px", cursor: "pointer"}}
+                                                    style = {{backgroundColor: "#ffffff", color: "#0a0a0a", border: "1px solid #262626", borderRadius: "4px", padding: "6px 16px", fontSize: "12px", cursor: "pointer"}}
                                                 >
                                                     Post
                                                 </button>

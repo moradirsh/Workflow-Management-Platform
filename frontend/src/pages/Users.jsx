@@ -22,9 +22,11 @@ export default function Users() {
                 ])
                 setCurrentUser(meRes.data)
                 setUsers(usersRes.data)
-            } catch (err) {
+            } 
+            catch (err) {
                 console.error("Error fetching users:", err)
-            } finally {
+            } 
+            finally {
                 setLoading(false)
             }
         }
@@ -42,27 +44,38 @@ export default function Users() {
             setNewUser({name: "", email: "", password: "", role: "member"})
             setShowForm(false)
             toast.success("User created successfully")
-        } catch (err) {
-            toast.error(err.response?.data?.detail || "Failed to create user")
+        } 
+        catch (err) {
+            const detail = err.response?.data?.detail
+            if (Array.isArray(detail)) {
+                toast.error(detail[0]?.msg || "Failed to create user")
+            } 
+            else {
+                toast.error(err.response?.data?.detail || "Failed to create user")
+            }
         }
     }
 
     const handleEditUser = async () => {
         try {
-            const payload = {
-                name: editForm.name,
-                email: editForm.email,
-                role: editForm.role
+            const payload = {name: editForm.name, email: editForm.email, role: editForm.role
             }
             if (editForm.new_password) {
-                payload.new_password = editForm.new_password
+                payload.password = editForm.new_password
             }
             const res = await api.put(`/users/${editingUser.id}`, payload)
             setUsers(users.map(u => u.id === editingUser.id ? res.data : u))
             setEditingUser(null)
             toast.success("User updated")
-        } catch (err) {
-            toast.error(err.response?.data?.detail || "Failed to update user")
+        } 
+        catch (err) {
+            const detail = err.response?.data?.detail
+            if (Array.isArray(detail)) {
+                toast.error(detail[0]?.msg || "Failed to update user")
+            } 
+            else {
+                toast.error(err.response?.data?.detail || "Failed to update user")
+            }
         }
     }
 
@@ -73,8 +86,15 @@ export default function Users() {
             await api.delete(`/users/${userId}`)
             setUsers(users.filter(u => u.id !== userId))
             toast.success("User deleted")
-        } catch (err) {
-            toast.error(err.response?.data?.detail || "Failed to delete user")
+        } 
+        catch (err) {
+            const detail = err.response?.data?.detail
+            if (Array.isArray(detail)) {
+                toast.error(detail[0]?.msg || "Failed to delete user")
+            } 
+            else {
+                toast.error(err.response?.data?.detail || "Failed to delete user")
+            }
         }
     }
 
@@ -105,7 +125,7 @@ export default function Users() {
                     </h2>
                     <button
                         onClick = {() => setShowForm(!showForm)}
-                        style = {{backgroundColor: "#0a0a0a", color: "#ffffff", border: "1px solid #262626", borderRadius: "4px", padding: "8px 16px", cursor: "pointer", fontSize: "13px"}}
+                        style = {{backgroundColor: "#ffffff", color: "#0a0a0a", border: "1px solid #262626", borderRadius: "4px", padding: "8px 16px", cursor: "pointer", fontSize: "13px"}}
                     >
                         + Add User
                     </button>
@@ -125,7 +145,7 @@ export default function Users() {
                                 type = "text"
                                 value = {newUser.name}
                                 onChange = {(e) => setNewUser({...newUser, name: e.target.value})}
-                                style = {{display: "block", width: "100%", padding: "8px", boxSizing: "border-box"}}
+                                style = {{display: "block", width: "100%", padding: "8px", boxSizing: "border-box", backgroundColor: "#0a0a0a"}}
                             />
                         </div>
                         <div style = {{marginBottom: "1rem"}}>
@@ -136,7 +156,7 @@ export default function Users() {
                                 type = "email"
                                 value = {newUser.email}
                                 onChange = {(e) => setNewUser({...newUser, email: e.target.value})}
-                                style = {{display: "block", width: "100%", padding: "8px", boxSizing: "border-box"}}
+                                style = {{display: "block", width: "100%", padding: "8px", boxSizing: "border-box", backgroundColor: "#0a0a0a"}}
                             />
                         </div>
                         <div style = {{marginBottom: "1rem"}}>
@@ -147,7 +167,7 @@ export default function Users() {
                                 type = "password"
                                 value = {newUser.password}
                                 onChange = {(e) => setNewUser({...newUser, password: e.target.value})}
-                                style = {{display: "block", width: "100%", padding: "8px", boxSizing: "border-box"}}
+                                style = {{display: "block", width: "100%", padding: "8px", boxSizing: "border-box", backgroundColor: "#0a0a0a"}}
                             />
                         </div>
                         <div style = {{marginBottom: "1rem"}}>
@@ -157,7 +177,7 @@ export default function Users() {
                             <select
                                 value = {newUser.role}
                                 onChange = {(e) => setNewUser({...newUser, role: e.target.value})}
-                                style = {{display: "block", width: "100%", padding: "8px", boxSizing: "border-box"}}
+                                style = {{display: "block", width: "100%", padding: "8px", boxSizing: "border-box", backgroundColor: "#0a0a0a"}}
                             >
                                 <option value = "member">Member</option>
                                 <option value = "admin">Admin</option>
@@ -165,7 +185,7 @@ export default function Users() {
                         </div>
                         <button
                             onClick = {handleCreateUser}
-                            style = {{backgroundColor: "#0a0a0afff", color: "#0a0a0a", border: "none", borderRadius: "4px", padding: "8px 16px", cursor: "pointer", fontSize: "13px"}}
+                            style = {{backgroundColor: "#ffffff", color: "#0a0a0a", border: "none", borderRadius: "4px", padding: "8px 16px", cursor: "pointer", fontSize: "13px", border: "1px solid #262626"}}
                         >
                             Create User
                         </button>

@@ -2,7 +2,7 @@
 from fastapi import APIRouter, Depends, HTTPException 
 from sqlalchemy.orm import Session
 from typing import List
-from app.schemas.user import UserCreate, UserRead, UserLogin, TokenResponse, UserUpdate, AdminUserCreate, OrgRegister
+from app.schemas.user import UserCreate, UserRead, UserLogin, TokenResponse, UserUpdate, AdminUserUpdate, OrgRegister
 from app.models.user import User
 from app.core.database import get_db
 from app.core.security import hash_password, verify_password, create_access_token 
@@ -75,7 +75,7 @@ def get_users(db: Session = Depends(get_db), current_user: User = Depends(get_cu
 
 # Admin creates a new user in their org
 @router.post("/create", response_model=UserRead)
-def admin_create_user(data: AdminUserCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+def admin_create_user(data: AdminUserUpdate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     # Only admins can create users
     if current_user.role != "admin":
         raise HTTPException(status_code = 403, detail = "Only admins can create users")  
@@ -91,7 +91,7 @@ def admin_create_user(data: AdminUserCreate, db: Session = Depends(get_db), curr
 # Admin deletes a user
 @router.delete("/{user_id}", status_code = 204)
 def delete_user(user_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    # Only admins can delete users
+    # Only admins check
     if current_user.role != "admin":
         raise HTTPException(status_code = 403, detail = "Only admins can delete users")
     user = db.query(User).filter(User.id == user_id, User.org_id == current_user.org_id).first()
@@ -101,6 +101,25 @@ def delete_user(user_id: int, db: Session = Depends(get_db), current_user: User 
         raise HTTPException(status_code = 400, detail = "Cannot delete yourself")
     db.delete(user)
     db.commit()
+    
+    
+# Admin updates a user
+@router.put("/{user_id}", response_model = UserRead)
+def admin_update_user(user_id: int, data: AdminUserUpdate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    if current_user.role != "admin":
+        raise HTTPException(status_code = 403, detail = "Only admins can update users")
+    user = db.query(User).filter(User.id == user_id, User.org_id == current_user.org_id).first()
+    if not user:
+        raise HTTPException(status_code = 404, detail = "User not found")
+    user.name = data.name
+    user.email = data.email
+    user.role = data.role
+    if data.password:
+        user.hashed_password = hash_password(data.password)
+    db.commit()
+    db.refresh(user)
+    return user
+    
 
 # Limit login attempts
 @router.post("/login", response_model = TokenResponse)
