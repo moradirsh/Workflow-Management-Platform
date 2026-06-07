@@ -29,7 +29,7 @@ export default function Landing() {
 
             {/* Appearance of what caseflow is */}
             <div style = {{textAlign: "center", padding: "6rem 2rem 4rem"}}>
-                <div style = {{display: "inline-block", backgroundColor: "#0a0a0a", border: "1px solid #262626", borderRadius: "999px", padding: "4px 16px", fontSize: "12px", color: "#ffffff", marginBottom: "1.5rem"}}>
+                <div style = {{display: "inline-block", backgroundColor: "#141414", border: "1px solid #262626", borderRadius: "999px", padding: "4px 16px", fontSize: "12px", color: "#ffffff", marginBottom: "1.5rem"}}>
                     AI Augmented Case Management
                 </div>
                 <h1 style = {{fontSize: "52px", fontWeight: "600", color: "#f5f5f5", marginBottom: "1.5rem", lineHeight: "1.2", letterSpacing: "-1px"}}>
@@ -100,7 +100,7 @@ export default function Landing() {
                             <div style = {{fontSize: "20px", marginBottom: "12px", color: "#ffffff"}}>
                                 {feature.icon}
                             </div>
-                            <h3 style = {{fontSize: "14px", fontWeight: "500", color: "#f5f5f5", marginBottom: "8px"}}>
+                            <h3 style = {{fontSize: "14px", fontWeight: "500", color: "#ffffff", marginBottom: "8px"}}>
                                 {feature.title}
                             </h3>
                             <p style = {{fontSize: "13px", color: "#a3a3a3", lineHeight: "1.6"}}>

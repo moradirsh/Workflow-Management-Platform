@@ -36,9 +36,18 @@ export default function Login() {
 
     return (
         <div style = {{width: "500px", margin: "60px auto", padding: "2rem"}}>
-            <h2 style = {{textAlign: "center", marginBottom: "2rem", paddingBottom: "1rem", borderBottom: "1px solid #262626"}}>
-                CaseFlow Login
-            </h2>
+            <div style = {{textAlign: "center", marginBottom: "-30px", paddingBottom: "1rem"}}>
+            <p
+                onClick = {() => navigate("/landing")}
+                style = {{fontSize: "25px", fontWeight: "600", cursor: "pointer", color: "#ffffff", marginBottom: "8px"}}
+            >
+                CaseFlow
+            </p>
+            <div style = {{borderBottom: "1px solid #262626", margin: "10px 0"}} />
+            <p style = {{fontSize: "20px", color: "#a3a3a3"}}>
+                Login
+            </p>
+        </div>
 
             {/* Error message on fail */}
             <div style = {{height: "24px", overflow: "hidden", marginBottom: "1rem"}}>
@@ -71,7 +80,7 @@ export default function Login() {
                     </div>
 
                     <div style = {{ textAlign: "center"}}>
-                        <button type = "submit" style = {{width: "100%", padding: "10px", justifyContent: "center", backgroundColor: "#0a0a0a"}}>
+                        <button type = "submit" style = {{width: "100%", padding: "10px", justifyContent: "center", backgroundColor: "#ffffff", color: "#0a0a0a",  border: "1px solid #262626", borderRadius: "4px", cursor: "pointer" }}>
                             Login
                         </button>
                     </div>

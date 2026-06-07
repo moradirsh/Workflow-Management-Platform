@@ -9,7 +9,6 @@ export default function Register() {
 
     const handleRegister = async () => {
         setError("")
-        console.log("sending:", form)
         if (!form.org_name || !form.name || !form.email || !form.password) {      
               setError("All fields are required")
               return
@@ -33,9 +32,18 @@ export default function Register() {
 
     return (
         <div style = {{width: "500px", margin: "60px auto", padding: "2rem"}}>
-            <h2 style = {{textAlign: "center", marginBottom: "2rem", paddingBottom: "1rem", borderBottom: "1px solid #262626"}}>
-                Create Account
-            </h2>
+            <div style = {{textAlign: "center", marginBottom: "-30px", paddingBottom: "1rem"}}>
+            <p
+                onClick = {() => navigate("/landing")}
+                style = {{fontSize: "25px", fontWeight: "600", cursor: "pointer", color: "#ffffff", marginBottom: "8px"}}
+            >
+                CaseFlow
+            </p>
+            <div style = {{borderBottom: "1px solid #262626", margin: "10px 0"}} />
+            <p style = {{fontSize: "20px", color: "#a3a3a3"}}>
+                Register
+            </p>
+        </div>
 
             {/* Error message on fail */}
             <div style = {{height: "24px", overflow: "hidden", marginBottom: "1rem"}}>
@@ -92,7 +100,7 @@ export default function Register() {
                 </div>
                 <button
                     onClick = {handleRegister}
-                    style = {{display: "block", width: "100%", padding: "10px", backgroundColor: "#0a0a0a", color: "#ffffff", border: "1px solid #262626", borderRadius: "4px", cursor: "pointer"}}
+                    style = {{display: "block", width: "100%", padding: "10px", backgroundColor: "#ffffff", color: "#0a0a0a", border: "1px solid #262626", borderRadius: "4px", cursor: "pointer"}}
                 >
                     Register
                 </button>
