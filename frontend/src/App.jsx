@@ -24,8 +24,6 @@ export default function App() {
 
             <Route path = "/register" element = {<Register />} />
 
-            <Route path = "/landing" element = {<Landing />} />
-
             {/* Wrap all other routes with ProtectedRoute to require authentication */}
             <Route path = "/cases" element = {
                 <ProtectedRoute>
@@ -39,23 +37,23 @@ export default function App() {
                 </ProtectedRoute>
             } />
 
+            <Route path = "/users" element = {
+                <ProtectedRoute>
+                    <Users />
+                </ProtectedRoute>
+            } />
+            
             <Route path = "/settings" element = {
                 <ProtectedRoute>
                     <Settings />
                 </ProtectedRoute>
             } />
 
-            <Route path = "/users" element = {
-                <ProtectedRoute>
-                    <Users />
-                </ProtectedRoute>
-            } />
-
             {/* Add more routes later */}
 
-            
+            <Route path = "/landing" element = {<Landing />} />
 
-            <Route path = "/" element = {<Navigate to = "/cases" />} />
+            <Route path = "/" element = {<Navigate to = "/landing" />} />
         </Routes>
     )
 }
