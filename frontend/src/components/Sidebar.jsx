@@ -16,7 +16,7 @@ export default function Sidebar() {
                 padding: "10px 16px",
                 cursor: "pointer",
                 fontSize: "13px",
-                borderLeft: location.pathname === path ? "2px solid #0a0a0afff" : "2px solid transparent",
+                borderLeft: location.pathname === path ? "2px solid #ffffff" : "2px solid transparent",
                 color: location.pathname === path ? "#f5f5f5" : "#a3a3a3",
                 backgroundColor: location.pathname === path ? "#141414" : "transparent",
                 fontWeight: location.pathname === path ? "500" : "400"

@@ -6,7 +6,6 @@ from app.core.database import Base
 
 class ActivityLog(Base):
     __tablename__ = "activity_logs"
-
     id = Column(Integer, primary_key = True, index = True)
     case_id = Column(Integer, ForeignKey("cases.id", ondelete = "CASCADE"), nullable = False)
     user_id = Column(Integer, ForeignKey("users.id"), nullable = True)

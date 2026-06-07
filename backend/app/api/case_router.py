@@ -28,10 +28,15 @@ async def create_case_endpoint(title: str = Form(...), description: str | None =
     file_path = None
     file_name = None
     file_content = None
+    MAX_FILE_SIZE = 10 * 1024 * 1024 # 10MB
+
     if file:
         file_bytes = await file.read()
-        file_content = extract_file_content(file_bytes, file.filename)
         
+        # Reject files over 10MB
+        if len(file_bytes) > MAX_FILE_SIZE:
+            raise HTTPException(status_code=400, detail="File size exceeds 10MB limit")
+        file_content = extract_file_content(file_bytes, file.filename)
         file_name = file.filename
         unique_name = f"{uuid.uuid4()}_{file.filename}"
         file_path = os.path.join(UPLOAD_DIR, unique_name)
@@ -69,7 +74,7 @@ def get_case_endpoint(case_id: int, db: Session = Depends(get_db), current_user:
         raise HTTPException(status_code = 404, detail = "Case not found")
     return case
 
-# Update a case by ID
+# Update a case only to change assignee and status
 @router.put("/{case_id}", response_model = CaseRead)
 def update_case_endpoint(case_id: int, updates: CaseUpdate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     case = get_case(db, case_id)
@@ -96,7 +101,7 @@ def delete_case_endpoint(case_id: int, db: Session = Depends(get_db), current_us
         raise HTTPException(status_code = 404, detail = "Case not found")
     delete_case(db, case)
 
-# Download file when user attatchs file creating a case
+# Download file when user attaches file creating a case
 @router.get("/{case_id}/file")
 def download_file(case_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     case = get_case(db, case_id)

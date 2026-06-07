@@ -35,7 +35,7 @@ export default function Login() {
     }
 
     return (
-        <div style = {{width: "400px", margin: "60px auto", padding: "2rem"}}>
+        <div style = {{width: "500px", margin: "60px auto", padding: "2rem"}}>
             <h2 style = {{textAlign: "center", marginBottom: "2rem", paddingBottom: "1rem", borderBottom: "1px solid #262626"}}>
                 CaseFlow Login
             </h2>

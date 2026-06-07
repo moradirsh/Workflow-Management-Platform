@@ -62,7 +62,7 @@ return (
             </p>
             <div style = {{display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "12px", marginBottom: "2rem"}}>
                 {[
-                    {label: "Total", value: total, color: "#0a0a0afff"},
+                    {label: "Total", value: total, color: "#ffffff"},
                     {label: "Open", value: open, color: "#60a5fa"},
                     {label: "In Progress", value: inProgress, color: "#f59e0b"},
                     {label: "Resolved", value: resolved, color: "#10b981"}

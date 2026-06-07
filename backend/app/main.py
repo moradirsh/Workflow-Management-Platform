@@ -8,14 +8,23 @@ from app.models.activity_log import ActivityLog #type: ignore
 from app.api.user_router import router as user_router 
 from fastapi.middleware.cors import CORSMiddleware
 from app.api.comment_router import router as comment_router
-
-
+from app.api.organization_router import router as organization_router
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.util import get_remote_address
+from slowapi.errors import RateLimitExceeded
+from slowapi.middleware import SlowAPIMiddleware
 
 app = FastAPI(title = "Workflow Management Platform")
 
+# LIMIT API RATE
+limiter = Limiter(key_func=get_remote_address, default_limits=["5/minute"])
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+app.add_middleware(SlowAPIMiddleware)
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins = ["*"],  # Allow all origins for development; restrict in production
+    allow_origins = ["http://localhost:5173"],  # Allow all origins for development; restrict in production
     allow_methods = ["*"],
     allow_headers = ["*"],
     allow_credentials = True,
@@ -30,6 +39,7 @@ def root():
 app.include_router(user_router)
 app.include_router(case_router.router)
 app.include_router(comment_router)
+app.include_router(organization_router)
 
 # Auto create required postgres tables; if new columns are added, manually delete table and re-run
 Base.metadata.create_all(bind = engine)

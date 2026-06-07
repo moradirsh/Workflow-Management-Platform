@@ -22,15 +22,20 @@ def create_case(db: Session, title: str, description: str | None = None, assigne
             combined_content += description
         if file_content:
             combined_content += f"\n\nFile content: \n{file_content}"
-        
-        category = classify_case(title, combined_content)
-        summary = summarize_case(title, combined_content)
-        recommendation = get_recommendation(title, category, summary)
-        case.category = category
-        case.summary = summary
-        case.recommendation = recommendation
-        db.commit()
-        db.refresh(case)
+            
+        combined_content = combined_content[:3000] # Limit to 3k chars to prevent excessive token usage
+            
+        try:
+            category = classify_case(title, combined_content)
+            summary = summarize_case(title, combined_content)
+            recommendation = get_recommendation(title, category, summary)
+            case.category = category
+            case.summary = summary
+            case.recommendation = recommendation
+            db.commit()
+            db.refresh(case)
+        except Exception as e:
+            print(f"Error during AI processing: {e}") # Case is saved just without AI analysis
     
     return case
 

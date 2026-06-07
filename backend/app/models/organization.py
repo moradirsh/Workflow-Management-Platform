@@ -4,11 +4,10 @@ from app.core.database import Base
 
 class Organization(Base):
     __tablename__ = "organizations"
-    
     id = Column(Integer, primary_key = True, index = True)
     name = Column(String, nullable = True, unique = True)
     created_at = Column(DateTime(timezone = True), server_default = func.now())
     
     
     # All users belong to x org
-    users = relationship("User", back_populates = "organization")
+    users = relationship("User", back_populates = "organization", cascade = "all, delete-orphan")

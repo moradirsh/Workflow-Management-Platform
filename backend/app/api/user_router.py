@@ -8,7 +8,11 @@ from app.core.database import get_db
 from app.core.security import hash_password, verify_password, create_access_token 
 from app.core.dependencies import get_current_user
 from app.models.organization import Organization
+from fastapi import Request
+from slowapi import Limiter
+from slowapi.util import get_remote_address
 
+limiter = Limiter(key_func = get_remote_address)
 router = APIRouter(prefix = "/users", tags = ["Users"])
 
 # Register a new org and admin user
@@ -85,15 +89,25 @@ def admin_create_user(data: AdminUserCreate, db: Session = Depends(get_db), curr
     return new_user
 
 # Admin deletes a user
-@router.delete("/{user_id}", status_code=204)
+@router.delete("/{user_id}", status_code = 204)
 def delete_user(user_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     # Only admins can delete users
     if current_user.role != "admin":
-        raise HTTPException(status_code=403, detail="Only admins can delete users")
+        raise HTTPException(status_code = 403, detail = "Only admins can delete users")
     user = db.query(User).filter(User.id == user_id, User.org_id == current_user.org_id).first()
     if not user:
-        raise HTTPException(status_code=404, detail="User not found")
+        raise HTTPException(status_code = 404, detail = "User not found")
     if user.id == current_user.id:
-        raise HTTPException(status_code=400, detail="Cannot delete yourself")
+        raise HTTPException(status_code = 400, detail = "Cannot delete yourself")
     db.delete(user)
     db.commit()
+
+# Limit login attempts
+@router.post("/login", response_model = TokenResponse)
+@limiter.limit("5/minute")
+def login(request: Request, user: UserLogin, db: Session = Depends(get_db)):
+    db_user = db.query(User).filter(User.email == user.email).first()
+    if not db_user or not verify_password(user.password, db_user.hashed_password):
+        raise HTTPException(status_code = 401, detail = "Invalid credentials")
+    token = create_access_token({"sub": str(db_user.id)})
+    return {"access_token": token, "token_type": "bearer"}

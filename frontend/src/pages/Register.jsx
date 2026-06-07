@@ -19,13 +19,20 @@ export default function Register() {
             await register(form)
             // This will redirect once acc is registered
             navigate("/login")
-        } catch (err) {
-            setError("Registration failed.")
+        } 
+        catch (err) {
+            const detail = err.response?.data?.detail
+            if (Array.isArray(detail)) {
+                setError(detail[0]?.msg || "Registration failed")
+            } 
+            else {
+                setError(detail || "Registration failed")
+            }
         }
     }
 
     return (
-        <div style = {{width: "400px", margin: "60px auto", padding: "2rem"}}>
+        <div style = {{width: "500px", margin: "60px auto", padding: "2rem"}}>
             <h2 style = {{textAlign: "center", marginBottom: "2rem", paddingBottom: "1rem", borderBottom: "1px solid #262626"}}>
                 Create Account
             </h2>

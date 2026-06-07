@@ -53,7 +53,13 @@ export default function Settings() {
             setNewPassword("")
         } 
         catch (err) {
-            setError(err.response?.data?.detail || "Failed to update profile")
+            const detail = err.response?.data?.detail
+            if (Array.isArray(detail)) {
+                setError(detail[0]?.msg || "Failed to update profile")
+            } 
+            else {
+                setError(detail || "Failed to update profile")
+            }
         }
     }
 
@@ -66,7 +72,7 @@ export default function Settings() {
                 <h2 style = {{marginBottom: "2rem", color: "#f5f5f5"}}>
                     Settings
                 </h2>
-                <div style = {{backgroundColor: "#141414", border: "1px solid #262626", borderRadius: "8px", padding: "1.5rem", marginBottom: "1.5rem", maxWidth: "500px"}}>
+                <div style = {{width: "300px", backgroundColor: "#141414", border: "1px solid #262626", borderRadius: "8px", padding: "1.5rem", marginBottom: "1.5rem"}}>
                     <p style = {{fontSize: "11px", fontWeight: "500", color: "#a3a3a3", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "1rem"}}>
                         Profile
                     </p>
@@ -139,6 +145,35 @@ export default function Settings() {
                     Save Changes
                 </button>
 
+                {/* Admin only delete org option */}
+                {profile.role === "admin" && (
+                <div style = {{backgroundColor: "#141414", border: "1px solid #ef4444", borderRadius: "8px", padding: "1.5rem", maxWidth: "500px", marginTop: "2rem"}}>
+                    <p style = {{fontSize: "11px", fontWeight: "500", color: "#ef4444", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "8px"}}>
+                        Danger Zone
+                    </p>
+                    <p style = {{fontSize: "13px", color: "#a3a3a3", marginBottom: "1rem"}}>
+                        Permanently delete your organization and all associated cases, users, and data. This action is irreversible.
+                    </p>
+                    <button
+                        onClick = {async () => {
+                            const confirmed = window.confirm("Are you sure you want to delete your organization? This will permanently delete all cases, users, and data. This action cannot be undone.")
+                            if (!confirmed) return
+                            const doubleConfirm = window.confirm("This is your final warning. All data will be permanently deleted. Continue?")
+                            if (!doubleConfirm) return
+                            try {
+                                await api.delete("/organizations/me")
+                                localStorage.removeItem("token")
+                                window.location.href = "/landing"
+                            } catch (err) {
+                                toast.error("Failed to delete organization")
+                            }
+                        }}
+                        style = {{backgroundColor: "transparent", color: "#ef4444", border: "1px solid #ef4444", borderRadius: "4px", padding: "8px 16px", cursor: "pointer", fontSize: "13px"}}
+                    >
+                        Delete Organization
+                    </button>
+                </div>
+                )}
             </div>
         </div>
     )

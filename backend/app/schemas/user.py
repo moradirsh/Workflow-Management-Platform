@@ -1,4 +1,5 @@
-from pydantic import BaseModel
+from binascii import Error
+from pydantic import BaseModel, field_validator
 from datetime import datetime
 
 # Data from frontend to create a user
@@ -37,12 +38,39 @@ class UserUpdate(BaseModel):
     current_password: str | None = None
     new_password: str | None = None
     
+    @field_validator("new_password")
+    def password_strength(cls, v):
+        if v is None:
+            return v
+        if len(v) < 8:
+            raise Error("Password must be at least 8 characters")
+        if not any(c.isupper() for c in v):
+            raise Error("Password must contain at least one uppercase letter")
+        if not any(c.isdigit() for c in v):
+            raise Error("Password must contain at least one number")
+        if not any(c in "!@#$%^&*()_+-=[]{}|;':,.<>?/" for c in v):
+            raise Error("Password must contain at least one special character")
+        return v
+    
 # Admin creating new user
 class AdminUserCreate(BaseModel):
     name: str
     email: str
     password: str
     role: str = "member"
+    
+    # Add password strength validation
+    @field_validator("password")
+    def password_strength(cls, v):
+        if len(v) < 8:
+            raise Error("Password must be at least 8 characters")
+        if not any(c.isupper() for c in v):
+            raise Error("Password must contain at least one uppercase letter")
+        if not any(c.isdigit() for c in v):
+            raise Error("Password must contain at least one number")
+        if not any(c in "!@#$%^&*()_+-=[]{}|;':,.<>?/" for c in v):
+            raise Error("Password must contain at least one special character")
+        return v
 
 # Registration of org, creates admin in process
 class OrgRegister(BaseModel):
@@ -50,3 +78,22 @@ class OrgRegister(BaseModel):
     name: str
     email: str
     password: str
+    
+    # Same idea as above, org reg should be more than 1 char
+    @field_validator("password")
+    def password_strength(cls, v):
+        if len(v) < 8:
+            raise Error("Password must be at least 8 characters")
+        if not any(c.isupper() for c in v):
+            raise Error("Password must contain at least one uppercase letter")
+        if not any(c.isdigit() for c in v):
+            raise Error("Password must contain at least one number")
+        if not any(c in "!@#$%^&*()_+-=[]{}|;':,.<>?/" for c in v):
+            raise Error("Password must contain at least one special character")
+        return v
+
+    @field_validator("org_name")
+    def org_name_length(cls, v):
+        if len(v) < 2:
+            raise Error("Organization name must be at least 2 characters")
+        return v.strip()

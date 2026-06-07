@@ -201,7 +201,7 @@ export default function Cases() {
                                     style = {{display: "block", width: "100%", fontSize: "12px", color: "#a3a3a3", backgroundColor: "#141414"}}
                                 />
                                 {selectedFile && (
-                                    <p style = {{fontSize: "11px", color: "#0a0a0afff", marginTop: "4px"}}>
+                                    <p style = {{fontSize: "11px", color: "#ffffff", marginTop: "4px"}}>
                                         {selectedFile.name}
                                     </p>
                                 )}
@@ -224,7 +224,7 @@ export default function Cases() {
                                 onClick = {() => handleSelectCase(c)}
                                 style = {{
                                     padding: "14px 16px", borderBottom: "1px solid #262626", cursor: "pointer", backgroundColor: selectedCase?.id === c.id ? "#141414" : "transparent",
-                                    borderLeft: selectedCase?.id === c.id ? "2px solid #0a0a0afff" : "2px solid transparent"
+                                    borderLeft: selectedCase?.id === c.id ? "2px solid #ffffff" : "2px solid transparent"
                                 }}
                             >
                                 <div style = {{fontSize: "11px", color: "#a3a3a3", marginBottom: "6px"}}>
@@ -413,10 +413,10 @@ export default function Cases() {
                                 </div>
                             )}
 
-                            {/* AI Augmentation background */}
+                            {/* AI background box */}
                             <div style = {{backgroundColor: "#141414", border: "1px solid #262626", borderRadius: "8px", padding: "1rem", marginBottom: "1rem"}}>
-                                <p style = {{fontSize: "11px", fontWeight: "500", color: "#0a0a0afff", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "12px"}}>
-                                    ⊙ AI Augmentation
+                                <p style = {{fontSize: "11px", fontWeight: "500", color: "#ffffff", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "12px"}}>
+                                    🜎 AI Augmentation
                                 </p>
 
                                 {/* Classification */}
@@ -480,19 +480,19 @@ export default function Cases() {
                                                 key = {log.id}
                                                 style = {{display: "flex", gap: "10px", marginBottom: "10px", alignItems: "flex-start"}}
                                             >
-                                                <div style = {{width: "8px", height: "8px", borderRadius: "50%", backgroundColor: "#0a0a0afff", marginTop: "4px", flexShrink: 0}} />
+                                                <div style = {{width: "8px", height: "8px", borderRadius: "50%", backgroundColor: "#ffffff", marginTop: "4px", flexShrink: 0}} />
                                                 <div>
                                                     <p style = {{fontSize: "12px", color: "#f5f5f5", marginBottom: "2px"}}> 
                                                         {/* Alteration of display for user changing user, user changing assignment progress */}
                                                         {log.details?.changed_by && (
-                                                            <span style = {{color: "#0a0a0afff"}}>{log.details.changed_by} </span>
+                                                            <span style = {{color: "#ffffff", fontWeight: "700"}}>{log.details.changed_by} </span>
                                                         )}
                                                         {log.action.replace(/_/g, " ")}
                                                         {log.details?.changes?.status && (
-                                                            <span> → <span style = {{color: "#0a0a0afff"}}>{log.details.changes.previous_status}</span> to <span style = {{color: "#0a0a0afff"}}>{log.details.changes.status}</span></span>
+                                                            <span> → <span style = {{color: "#ffffff", fontWeight: "700"}}>{log.details.changes.previous_status}</span> to <span style = {{color: "#ffffff", fontWeight: "700"}}>{log.details.changes.status}</span></span>
                                                         )}
                                                         {log.details?.changes?.assignee_id && (
-                                                            <span> → assigned to <span style = {{color: "#0a0a0afff"}}>{log.details.changes.assignee_name}</span></span>
+                                                            <span> → assigned to <span style = {{color: "#ffffff", fontWeight: "700"}}>{log.details.changes.assignee_name}</span></span>
                                                         )}
                                                         {log.details?.changes?.assignee_id === null && ` → unassigned`}
                                                     </p>
@@ -535,7 +535,7 @@ export default function Cases() {
                                                         style = {{borderBottom: "1px solid #262626", paddingBottom: "10px", marginBottom: "10px"}}
                                                     >
                                                         <div style = {{display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px"}}>
-                                                            <span style = {{fontSize: "12px", color: "#0a0a0afff", fontWeight: "500"}}>
+                                                            <span style = {{fontSize: "12px", color: "#ffffff", fontWeight: "700"}}>
                                                                 {comment.author_name}
                                                             </span>
                                                             <span style = {{fontSize: "11px", color: "#a3a3a3"}}>
