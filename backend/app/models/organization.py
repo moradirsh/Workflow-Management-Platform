@@ -11,3 +11,4 @@ class Organization(Base):
     
     # All users belong to x org
     users = relationship("User", back_populates = "organization", cascade = "all, delete-orphan")
+    cases = relationship("Case", back_populates = "organization", cascade = "all, delete-orphan", passive_deletes = True)

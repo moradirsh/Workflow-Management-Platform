@@ -17,5 +17,5 @@ class User(Base):
     # Cases assigned to the user based on org
     cases = relationship("Case", back_populates = "assignee", foreign_keys = "[Case.assignee_id]")
     activity_logs = relationship("ActivityLog", back_populates = "user")
-    comments = relationship("Comment", back_populates = "author")
+    comments = relationship("Comment", back_populates = "author", cascade = "all, delete-orphan")
     organization = relationship("Organization", back_populates = "users")

@@ -1,5 +1,6 @@
 import {useState, useEffect} from "react"
 import {useNavigate} from "react-router-dom"
+import {toast} from "sonner"
 import Sidebar from "../components/Sidebar"
 import api from "../api/axios"
 
@@ -37,10 +38,13 @@ export default function Settings() {
     const handleUpdate = async () => {
         setError("")
         setSuccess("")
+        if (newPassword && !currentPassword) {
+            setError("Please enter your current password")
+            return
+        }
         try {
             const payload = {}
             if (name) payload.name = name
-            if (role) payload.role = role
             if (newPassword) {
                 payload.current_password = currentPassword
                 payload.new_password = newPassword
@@ -72,7 +76,7 @@ export default function Settings() {
                 <h2 style = {{marginBottom: "2rem", color: "#f5f5f5"}}>
                     Settings
                 </h2>
-                <div style = {{width: "300px", backgroundColor: "#141414", border: "1px solid #262626", borderRadius: "8px", padding: "1.5rem", marginBottom: "1.5rem"}}>
+                <div style = {{width: "500px", backgroundColor: "#141414", border: "1px solid #262626", borderRadius: "8px", padding: "1.5rem", marginBottom: "1.5rem"}}>
                     <p style = {{fontSize: "11px", fontWeight: "500", color: "#a3a3a3", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "1rem"}}>
                         Profile
                     </p>
@@ -99,7 +103,7 @@ export default function Settings() {
                         />
                     </div>
                 </div>
-                <div style = {{backgroundColor: "#141414", border: "1px solid #262626", borderRadius: "8px", padding: "1.5rem", marginBottom: "1.5rem", maxWidth: "500px"}}>
+                <div style = {{width: "500px", backgroundColor: "#141414", border: "1px solid #262626", borderRadius: "8px", padding: "1.5rem", marginBottom: "1.5rem"}}>
                     <p style = {{fontSize: "11px", fontWeight: "500", color: "#a3a3a3", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "1rem"}}>
                         Change Password
                     </p>

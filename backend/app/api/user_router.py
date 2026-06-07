@@ -58,11 +58,19 @@ def get_me(current_user: User = Depends(get_current_user)):
 def update_me(updates: UserUpdate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     if updates.name:
         current_user.name = updates.name
-    if updates.role: 
-        current_user.role = updates.role
     if updates.new_password:
-        if not updates.current_password or not verify_password(updates.current_password, current_user.hashed_password):
-            raise HTTPException(status_code = 400, detail = "Current password is incorrect")
+        # Check curr pass first
+        if not updates.current_password:
+            raise HTTPException(status_code=400, detail="Current password is required")
+        if not verify_password(updates.current_password, current_user.hashed_password):
+            raise HTTPException(status_code=400, detail="Current password is incorrect")
+        # Then check strength
+        if len(updates.new_password) < 8:
+            raise HTTPException(status_code=400, detail="Password must be at least 8 characters")
+        if not any(c.isupper() for c in updates.new_password):
+            raise HTTPException(status_code=400, detail="Password must contain at least one uppercase letter")
+        if not any(c.isdigit() for c in updates.new_password):
+            raise HTTPException(status_code=400, detail="Password must contain at least one number")
         current_user.hashed_password = hash_password(updates.new_password)
     db.commit()
     db.refresh(current_user)
