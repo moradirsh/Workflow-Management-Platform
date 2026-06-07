@@ -24,7 +24,7 @@ app.add_middleware(SlowAPIMiddleware)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins = ["http://localhost:5173", "https://workflow-management-platform.vercel.app"],  # Allow all origins for development; restrict in production
+    allow_origins = ["http://localhost:5173", "https://workflow-management-platform.vercel.app", "https://workflow-management-platform-git-main-ktmxbowgtr.vercel.app"],  # Allow all origins for development; restrict in production
     allow_methods = ["*"],
     allow_headers = ["*"],
     allow_credentials = True,
