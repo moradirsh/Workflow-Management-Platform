@@ -168,7 +168,8 @@ export default function Settings() {
                                 await api.delete("/organizations/me")
                                 localStorage.removeItem("token")
                                 window.location.href = "/landing"
-                            } catch (err) {
+                            } 
+                            catch (err) {
                                 toast.error("Failed to delete organization")
                             }
                         }}

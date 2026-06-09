@@ -167,12 +167,21 @@ export default function Cases() {
                                         const url = window.URL.createObjectURL(new Blob([res.data]))
                                         const link = document.createElement('a')
                                         link.href = url
-                                        link.setAttribute('download', 'cases.csv')
+                                        
+                                        // Get filename from response headers
+                                        const contentDisposition = res.headers['content-disposition']
+                                        const filename = contentDisposition
+                                            ? contentDisposition.split('filename=')[1]
+                                            : `cases_export_${new Date().toISOString().slice(0,19).replace('T','_').replace(/:/g,'')}.csv`
+
+                                        
+                                        link.setAttribute('download', filename)
                                         document.body.appendChild(link)
                                         link.click()
                                         link.remove()
                                         toast.success("Cases exported")
-                                    } catch (err) {
+                                    } 
+                                    catch (err) {
                                         toast.error("Failed to export cases")
                                     }
                                 }}
@@ -317,6 +326,7 @@ export default function Cases() {
                                 </h2>
                                 <button
                                     onClick = {async () => {
+
                                         // Will be confirmation to delete case
                                         const confirmed = window.confirm("Are you sure you want to delete this case? This action is irreversible.")
                                         if (!confirmed) return
@@ -325,7 +335,8 @@ export default function Cases() {
                                             setCases(prev => prev.filter(c => c.id !== selectedCase.id))
                                             setSelectedCase(null)
                                             toast.success("Case deleted")
-                                        } catch (err) {
+                                        } 
+                                        catch (err) {
                                             console.error("Error deleting case:", err)
                                         }
                                     }}
@@ -463,7 +474,8 @@ export default function Cases() {
                                                     document.body.appendChild(link)
                                                     link.click()
                                                     link.remove()
-                                                } catch (err) {
+                                                } 
+                                                catch (err) {
                                                     console.error("Error downloading file:", err)
                                                 }
                                             }}
@@ -637,7 +649,8 @@ export default function Cases() {
                                                             setComments([...comments, res.data])
                                                             setNewComment("")
                                                             toast.success("Comment posted")
-                                                        } catch (err) {
+                                                        } 
+                                                        catch (err) {
                                                             console.error("Error adding comment:", err)
                                                         }
                                                     }}

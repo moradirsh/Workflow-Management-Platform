@@ -7,6 +7,7 @@ from typing import List
 from app.core.dependencies import get_current_user
 from app.models.user import User
 from app.models.case import Case
+from datetime import datetime
 import os
 import uuid
 import csv
@@ -102,7 +103,7 @@ def export_cases_csv(db: Session = Depends(get_db), current_user: User = Depends
     return StreamingResponse(
         iter([output.getvalue()]),
         media_type = "text/csv",
-        headers = {"Content-Disposition": "attachment; filename=cases.csv"}
+        headers = {"Content-Disposition": f"attachment; filename=cases_export_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"}
     )
 
 # Get activity
