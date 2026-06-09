@@ -21,6 +21,8 @@ class CaseUpdate(BaseModel):
     status: str | None = None
     assignee_id: int | None = None
     priority: str | None = None 
+    group_id: int | None = None
+    custom_role_id: int | None = None
 
 # Data going out from database to frontend
 class CaseRead(BaseModel):
@@ -38,6 +40,8 @@ class CaseRead(BaseModel):
     created_at: datetime
     updated_at: datetime 
     created_by_name: str | None = None
+    group_id: int | None = None
+    custom_role_id: int | None = None
 
     # Look at objects attributes instead of relying on dict
     model_config = {

@@ -1,5 +1,5 @@
 # Records meaningful actions and context for cases,
-# This includes who performed them and when.
+# This includes who performed them and when
 from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, JSON, func
 from sqlalchemy.orm import relationship
 from app.core.database import Base

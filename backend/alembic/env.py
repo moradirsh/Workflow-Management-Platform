@@ -29,6 +29,10 @@ from app.models.ai_analysis import AIAnalysis #type: ignore
 from app.models.activity_log import ActivityLog #type: ignore
 from app.models.comment import Comment #type: ignore
 from app.models.organization import Organization #type: ignore
+from app.models.group import Group #type: ignore
+from app.models.custom_role import CustomRole #type: ignore
+from app.models.user_role import UserRole #type: ignore
+from app.models.group_member import GroupMember #type: ignore
 
 target_metadata = Base.metadata
 

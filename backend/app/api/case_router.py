@@ -1,6 +1,6 @@
 # REST endpoints for creating, listing, retrieving, and updating cases.
 # It handles request validation and delegates business logic to case_service.
-from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
+from fastapi import APIRouter, Depends, HTTPException, Query, UploadFile, File, Form
 from fastapi.responses import FileResponse, StreamingResponse
 from sqlalchemy.orm import Session
 from typing import List
@@ -8,6 +8,7 @@ from app.core.dependencies import get_current_user
 from app.models.user import User
 from app.models.case import Case
 from datetime import datetime
+from sqlalchemy import or_
 import os
 import uuid
 import csv
@@ -19,6 +20,8 @@ from app.services.case_service import create_case, get_cases, get_case, update_c
 from app.core.database import get_db
 from app.services.activity_service import log_activity, get_case_activity
 from app.ai.file_extractor import extract_file_content
+from app.models.group_member import GroupMember
+from app.models.user_role import UserRole
 
 router = APIRouter(prefix = "/cases", tags = ["Cases"])
 
@@ -27,7 +30,7 @@ os.makedirs(UPLOAD_DIR, exist_ok = True)
 
 # Create a new case
 @router.post("/", response_model = CaseRead)
-async def create_case_endpoint(title: str = Form(...), description: str | None = Form(None), assignee_id: int | None = Form(None), priority: str | None = Form(None), file: UploadFile | None = File(None), db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+async def create_case_endpoint(title: str = Form(...), description: str | None = Form(None), assignee_id: int | None = Form(None), priority: str | None = Form(None), file: UploadFile | None = File(None), db: Session = Depends(get_db), current_user: User = Depends(get_current_user), group_id: int | None = Form(None), custom_role_id: int | None = Form(None)):
     file_path = None
     file_name = None
     file_content = None
@@ -38,7 +41,7 @@ async def create_case_endpoint(title: str = Form(...), description: str | None =
         
         # Reject files over 10MB
         if len(file_bytes) > MAX_FILE_SIZE:
-            raise HTTPException(status_code=400, detail="File size exceeds 10MB limit")
+            raise HTTPException(status_code = 400, detail = "File size exceeds 10MB limit")
         file_content = extract_file_content(file_bytes, file.filename)
         file_name = file.filename
         unique_name = f"{uuid.uuid4()}_{file.filename}"
@@ -47,31 +50,30 @@ async def create_case_endpoint(title: str = Form(...), description: str | None =
             f.write(file_bytes)
     
     # Now pass in new case with file components
-    new_case = create_case(db, title, description, assignee_id, priority, file_content, file_path, file_name, current_user.org_id, created_by = current_user.id)
+    new_case = create_case(db, title, description, assignee_id, priority, file_content, file_path, file_name, current_user.org_id, created_by = current_user.id, group_id = group_id, custom_role_id = custom_role_id)
     log_activity(db, new_case.id, current_user.id, "case_created", {"title": new_case.title})
     return new_case
 
 # List all cases based on org (now uses backend search instead of frontend)
 @router.get("/", response_model = List[CaseRead])
-def list_cases(db: Session = Depends(get_db), assigned_to_me: bool = False, search: str | None = None, priority: str | None = None, status: str | None = None, current_user: User = Depends(get_current_user)):
+def list_cases(db: Session = Depends(get_db), assigned_to_me: bool = False, search: str | None = None, priority: str | None = None, status: str | None = None, group_id: List[int] = Query(default = []), custom_role_id: List[int] = Query(default = []), current_user: User = Depends(get_current_user)):
     query = db.query(Case).filter(Case.org_id == current_user.org_id)
 
-    # If assigned is true, only return cases assigned to curr user
-    if assigned_to_me:
-        query = query.filter(Case.assignee_id == current_user.id)
-    if search:
-        query = query.filter(Case.title.ilike(f"%{search}%") | Case.description.ilike(f"%{search}%"))
-    if priority:
-        query = query.filter(Case.priority == priority)
-    if status:
-        query = query.filter(Case.status == status)
-    return query.order_by(Case.created_at.desc()).all()
+    # Members only see cases relevant to them
+    if current_user.role == "member":
+        
+        # Get user's group IDs and role IDs
+        user_group_ids = [gm.group_id for gm in db.query(GroupMember).filter(GroupMember.user_id == current_user.id).all()]
+        user_role_ids = [ur.role_id for ur in db.query(UserRole).filter(UserRole.user_id == current_user.id).all()]
 
-# Export cases to CSV
-@router.get("/export/csv")
-def export_cases_csv(db: Session = Depends(get_db), current_user: User = Depends(get_current_user), assigned_to_me: bool = False, search: str | None = None, priority: str | None = None, status: str | None = None):
-    query = db.query(Case).filter(Case.org_id == current_user.org_id)
-    
+        # Show cases assigned to them, their group, or their role
+        from sqlalchemy import or_
+        query = query.filter(
+            or_(
+                Case.assignee_id == current_user.id, Case.created_by == current_user.id, Case.group_id.in_(user_group_ids) if user_group_ids else False, Case.custom_role_id.in_(user_role_ids) if user_role_ids else False
+            )
+        )
+
     if assigned_to_me:
         query = query.filter(Case.assignee_id == current_user.id)
     if search:
@@ -83,6 +85,48 @@ def export_cases_csv(db: Session = Depends(get_db), current_user: User = Depends
         query = query.filter(Case.priority == priority)
     if status:
         query = query.filter(Case.status == status)
+    if group_id:
+        query = query.filter(Case.group_id.in_(group_id))
+    if custom_role_id:
+        query = query.filter(Case.custom_role_id.in_(custom_role_id))
+
+    return query.order_by(Case.created_at.desc()).all()
+
+# Export cases to CSV
+@router.get("/export/csv")
+def export_cases_csv(db: Session = Depends(get_db), current_user: User = Depends(get_current_user), assigned_to_me: bool = False, search: str | None = None, priority: str | None = None, status: str | None = None, group_id: List[int] = Query(default = []), custom_role_id: List[int] = Query(default = [])):
+    query = db.query(Case).filter(Case.org_id == current_user.org_id)
+    
+    # Members only see cases relevant to them
+    if current_user.role == "member":
+        
+        # Get user's group IDs and role IDs
+        user_group_ids = [gm.group_id for gm in db.query(GroupMember).filter(GroupMember.user_id == current_user.id).all()]
+        user_role_ids = [ur.role_id for ur in db.query(UserRole).filter(UserRole.user_id == current_user.id).all()]
+
+        # Show cases assigned to them, their group, or their role
+        from sqlalchemy import or_
+        query = query.filter(
+            or_(
+                Case.assignee_id == current_user.id, Case.created_by == current_user.id, Case.group_id.in_(user_group_ids) if user_group_ids else False, Case.custom_role_id.in_(user_role_ids) if user_role_ids else False
+            )
+        )
+
+    if assigned_to_me:
+        query = query.filter(Case.assignee_id == current_user.id)
+    if search:
+        query = query.filter(
+            Case.title.ilike(f"%{search}%") |
+            Case.description.ilike(f"%{search}%")
+        )
+    if priority:
+        query = query.filter(Case.priority == priority)
+    if status:
+        query = query.filter(Case.status == status)
+    if group_id:
+        query = query.filter(Case.group_id.in_(group_id))
+    if custom_role_id:
+        query = query.filter(Case.custom_role_id.in_(custom_role_id))
         
     # Get case based on query params to export only what user is looking at
     cases = query.order_by(Case.created_at.desc()).all()
@@ -126,22 +170,45 @@ def get_case_endpoint(case_id: int, db: Session = Depends(get_db), current_user:
     case_data.created_by_name = creator.name if creator else "Unknown"
     return case_data
 
-# Update a case only to change assignee and status
+# Update a case only to change assignee, status, group, role
 @router.put("/{case_id}", response_model = CaseRead)
 def update_case_endpoint(case_id: int, updates: CaseUpdate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     case = get_case(db, case_id)
     if not case:
-        raise HTTPException(status_code = 404, detail = "Case not found")
-    details = updates.model_dump(exclude_unset = True)
-    if "status" in details:
-        details["previous_status"] = case.status
-    if "assignee_id" in details and details["assignee_id"]:
-        assignee = db.query(User).filter(User.id == details["assignee_id"]).first()
-        if assignee:
-            details["assignee_name"] = assignee.name
+        raise HTTPException(status_code=404, detail="Case not found")
+    changes = {}
+    if updates.status and updates.status != case.status:
+        changes["previous_status"] = case.status
+        changes["status"] = updates.status
+    if "assignee_id" in updates.model_fields_set:
+        assignee_name = "Unassigned"
+        if updates.assignee_id:
+            user = db.query(User).filter(User.id == updates.assignee_id).first()
+            assignee_name = user.name if user else "Unknown"
+        changes["assignee_id"] = updates.assignee_id
+        changes["assignee_name"] = assignee_name
+    if "group_id" in updates.model_fields_set:
+        group_name = "None"
+        if updates.group_id:
+            from app.models.group import Group
+            group = db.query(Group).filter(Group.id == updates.group_id).first()
+            group_name = group.name if group else "Unknown"
+        changes["group_id"] = updates.group_id
+        changes["group_name"] = group_name
+    if "custom_role_id" in updates.model_fields_set:
+        role_name = "None"
+        if updates.custom_role_id:
+            from app.models.custom_role import CustomRole
+            role = db.query(CustomRole).filter(CustomRole.id == updates.custom_role_id).first()
+            role_name = role.name if role else "Unknown"
+        changes["custom_role_id"] = updates.custom_role_id
+        changes["role_name"] = role_name
     updated = update_case(db, case, updates.model_dump(exclude_unset=True))
-    log_activity(db, case_id, current_user.id, "case_updated", { 
-                                                                "changed_by": current_user.name, "changes": details})
+    if changes:
+        log_activity(db, case_id, current_user.id, "case_updated", {
+            "changed_by": current_user.name,
+            "changes": changes
+        })
     return updated
 
 

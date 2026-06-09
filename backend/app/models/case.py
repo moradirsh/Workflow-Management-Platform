@@ -1,4 +1,4 @@
-# Case defines the primary workflow item, its state, assignee, and related AI and activity records.
+# Case defines the primary workflow item, its state, assignee, and related AI and activity records
 from sqlalchemy import Column, Integer, String, Text, ForeignKey, DateTime, func
 from sqlalchemy.orm import relationship
 from app.core.database import Base
@@ -21,7 +21,9 @@ class Case(Base):
     file_path = Column(String, nullable = True)
     file_name = Column(String, nullable = True)
     org_id = Column(Integer, ForeignKey("organizations.id", ondelete = "CASCADE"),  nullable = True)
-
+    group_id = Column(Integer, ForeignKey("groups.id", ondelete = "SET NULL"), nullable = True)
+    custom_role_id = Column(Integer, ForeignKey("custom_roles.id", ondelete = "SET NULL"), nullable = True)
+ 
     # Will point to assigned user
     assignee = relationship("User", back_populates = "cases", foreign_keys = [assignee_id], uselist = False)
     ai_analysis = relationship("AIAnalysis", back_populates = "case", uselist = False, cascade = "all, delete-orphan")

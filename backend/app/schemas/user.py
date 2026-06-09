@@ -1,5 +1,5 @@
 from binascii import Error
-from pydantic import BaseModel, field_validator
+from pydantic import BaseModel, field_validator, EmailStr
 from datetime import datetime
 
 # Data from frontend to create a user
@@ -45,6 +45,13 @@ class AdminUserCreate(BaseModel):
     password: str
     role: str = "member"
     
+    # Validate role
+    @field_validator("role")
+    def validate_role(cls, v):
+        if v not in ["admin", "member"]:
+            raise ValueError("Role must be admin or member")
+        return v
+    
     # Add password strength validation
     @field_validator("password")
     def password_strength(cls, v):
@@ -63,6 +70,13 @@ class AdminUserUpdate(BaseModel):
     email: str
     role: str = "member"
     password: str | None = None
+
+    @field_validator("email")
+    def validate_email(cls, v):
+        import re
+        if not re.match(r'^[^@]+@[^@]+\.[^@]+$', v):
+            raise ValueError("Invalid email format")
+        return v
 
     @field_validator("password")
     def password_strength(cls, v):

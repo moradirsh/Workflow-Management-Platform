@@ -1,8 +1,9 @@
 import {useState, useEffect} from "react";
-import {getCases, updateCase, deleteCase, createCase, getUsers, getCaseActivity, downloadFile, getComments, addComment, getCase, exportCases} from "../api/cases";
+import {getCases, updateCase, deleteCase, createCase, getUsers, getCaseActivity, downloadFile, getComments, addComment, getCase, exportCases, getGroups, getCustomRoles} from "../api/cases";
 import ReactMarkdown from "react-markdown";
 import Sidebar from "../components/Sidebar"
 import {toast} from "sonner"
+import api from "../api/axios"
 
 export default function Cases() {
     // States for view re-redner frontend when an update happens
@@ -12,7 +13,7 @@ export default function Cases() {
     const [loading, setLoading] = useState(true)
     const [selectedCase, setSelectedCase] = useState(null)
     const [showForm, setShowForm] = useState(false)
-    const [newCase, setNewCase] = useState({title: "", description: "", priority: "low"})
+    const [newCase, setNewCase] = useState({title: "", description: "", priority: "low", group_id: "", custom_role_id: "", assignee_id: ""})
     const [search, setSearch] = useState("")
     const [activity, setActivity] = useState([])
     const [selectedFile, setSelectedFile] = useState(null)
@@ -23,6 +24,19 @@ export default function Cases() {
     const [creating, setCreating] = useState(false)
     const [priorityFilter, setPriorityFilter] = useState("")
     const [statusFilter, setStatusFilter] = useState("")
+    const [groups, setGroups] = useState([])
+    const [customRoles, setCustomRoles] = useState([])
+    const [groupFilter, setGroupFilter] = useState([])
+    const [roleFilter, setRoleFilter] = useState([])
+    const [currentUser, setCurrentUser] = useState(null)
+    const [groupFilterOpen, setGroupFilterOpen] = useState(false)
+    const [roleFilterOpen, setRoleFilterOpen] = useState(false)
+    const [assignUserOpen, setAssignUserOpen] = useState(false)
+    const [assignGroupOpen, setAssignGroupOpen] = useState(false)
+    const [assignRoleOpen, setAssignRoleOpen] = useState(false)
+    const [createUserOpen, setCreateUserOpen] = useState(false)
+    const [createGroupOpen, setCreateGroupOpen] = useState(false)
+    const [createRoleOpen, setCreateRoleOpen] = useState(false)
 
     // Fetch all cases when page loads
     useEffect(() => {
@@ -46,9 +60,16 @@ export default function Cases() {
         const fetchData = async () => {
             setLoading(true)
             try {
-                const [casesRes, usersRes] = await Promise.all([getCases(myCases), getUsers()])
+                // Fetch current user first to determine if we should fetch all groups/roles or just ones related to the user
+                const meRes = await api.get('/users/me')
+                setCurrentUser(meRes.data)
+                const isAdminOrOwner = meRes.data?.role === "admin" || meRes.data?.role === "owner"
+                const [casesRes, usersRes, groupsRes, customRolesRes] = await Promise.all([getCases(myCases), getUsers(), api.get(isAdminOrOwner ? '/groups' : '/groups/my-groups'), api.get(isAdminOrOwner ? '/custom-roles' : '/custom-roles/my-roles')
+                ])
                 setCases(casesRes.data)
                 setUsers(usersRes.data)
+                setGroups(groupsRes.data)
+                setCustomRoles(customRolesRes.data)
             } 
             catch (err) {
                 console.error("Error fetching data:", err)
@@ -71,7 +92,7 @@ export default function Cases() {
         try {
             const response = await createCase(newCase, selectedFile)
             setCases([...cases, response.data])
-            setNewCase({title: "", description: "", priority: "low"})
+            setNewCase({title: "", description: "", priority: "low", group_id: "", custom_role_id: ""})
             setSelectedFile(null)
             setShowForm(false)
             toast.success("Case created - AI analysis complete")
@@ -91,10 +112,7 @@ export default function Cases() {
         setShowActivity(false)
         setShowComments(false)
         try {
-            const [caseRes, activityRes, commentsRes] = await Promise.all([
-            getCase(c.id),
-            getCaseActivity(c.id),
-            getComments(c.id)
+            const [caseRes, activityRes, commentsRes] = await Promise.all([getCase(c.id), getCaseActivity(c.id), getComments(c.id)
             ])
         setSelectedCase(caseRes.data) // Update selected case to pass creator name 
         setActivity(activityRes.data)
@@ -109,7 +127,7 @@ export default function Cases() {
     useEffect(() => {
         const fetchWithSearch = async () => {
             try {
-                const res = await getCases(myCases, search, priorityFilter, statusFilter)
+                const res = await getCases(myCases, search, priorityFilter, statusFilter, groupFilter, roleFilter)
                 setCases(res.data)
             } 
             catch (err) {
@@ -120,7 +138,8 @@ export default function Cases() {
         // Debounce each time with 300ms so router isnt constantly spamming backend
         const timer = setTimeout(fetchWithSearch, 300)
         return () => clearTimeout(timer)
-    }, [search, myCases, priorityFilter, statusFilter])
+    }, [search, myCases, priorityFilter, statusFilter, groupFilter, roleFilter])
+
 
     if (loading) {return <div>Loading...</div>}
 
@@ -132,7 +151,7 @@ export default function Cases() {
                 <Sidebar />
 
                 {/* Case list panel */}
-                <div style = {{width: "400px", borderRight: "1px solid #262626", overflowY: "auto", backgroundColor: "#0a0a0a", display: "flex", flexDirection: "column"}}>
+                <div style = {{width: "650px", borderRight: "1px solid #262626", overflowY: "auto", backgroundColor: "#0a0a0a", display: "flex", flexDirection: "column"}}>
 
                     {/* Case list header */}
                     <div style = {{padding: "12px 16px", borderBottom: "1px solid #262626", display: "flex", justifyContent: "space-between", alignItems: "center"}}>
@@ -163,7 +182,7 @@ export default function Cases() {
                             <button
                                 onClick = {async () => {
                                     try {
-                                        const res = await exportCases(myCases, search, priorityFilter, statusFilter)
+                                        const res = await exportCases(myCases, search, priorityFilter, statusFilter, groupFilter, roleFilter)
                                         const url = window.URL.createObjectURL(new Blob([res.data]))
                                         const link = document.createElement('a')
                                         link.href = url
@@ -223,6 +242,82 @@ export default function Cases() {
                             <option value = "in progress">In Progress</option>
                             <option value = "resolved">Resolved</option>
                         </select>
+
+                        {/* Group filter dropdown */}
+                        <div style = {{position: "relative"}}>
+                            <button
+                                onClick = {() => setGroupFilterOpen(!groupFilterOpen)}
+                                style = {{backgroundColor: "#141414", border: "1px solid #262626", borderRadius: "4px", color: "#ffffff", padding: "5px 8px", fontSize: "12px", cursor: "pointer", display: "flex", gap: "6px", alignItems: "center", whiteSpace: "nowrap"}}
+                            >
+                                {groupFilter.length > 0 ? `Groups (${groupFilter.length})` : "All Groups"}
+                                <span>{groupFilterOpen ? "▲" : "▼"}</span>
+                            </button>
+                            {groupFilterOpen && (
+                                <div style = {{position: "absolute", top: "100%", left: 0, backgroundColor: "#141414", border: "1px solid #262626", borderRadius: "4px", zIndex: 100, minWidth: "150px", marginTop: "4px"}}>
+                                    <div
+                                        onClick = {() => setGroupFilter([])}
+                                        style = {{padding: "8px 12px", cursor: "pointer", fontSize: "13px", color: "#a3a3a3", display: "flex", gap: "8px", alignItems: "center"}}
+                                    >
+                                        <span>{groupFilter.length === 0 ? "☑" : "☐"}</span>
+                                        All Groups
+                                    </div>
+                                    {groups.map(g => (
+                                        <div
+                                            key = {g.id}
+                                            onClick = {() => {
+                                                if (groupFilter.includes(g.id)) {
+                                                    setGroupFilter(groupFilter.filter(id => id !== g.id))
+                                                } else {
+                                                    setGroupFilter([...groupFilter, g.id])
+                                                }
+                                            }}
+                                            style = {{padding: "8px 12px", cursor: "pointer", fontSize: "13px", color: "#ffffff", display: "flex", gap: "8px", alignItems: "center", backgroundColor: groupFilter.includes(g.id) ? "#1e1e1e" : "transparent"}}
+                                        >
+                                            <span>{groupFilter.includes(g.id) ? "☑" : "☐"}</span>
+                                            {g.name}
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Role filter dropdown */}
+                        <div style = {{position: "relative"}}>
+                            <button
+                                onClick = {() => setRoleFilterOpen(!roleFilterOpen)}
+                                style = {{backgroundColor: "#141414", border: "1px solid #262626", borderRadius: "4px", color: "#ffffff", padding: "5px 8px", fontSize: "12px", cursor: "pointer", display: "flex", gap: "6px", alignItems: "center", whiteSpace: "nowrap"}}
+                            >
+                                {roleFilter.length > 0 ? `Roles (${roleFilter.length})` : "All Roles"}
+                                <span>{roleFilterOpen ? "▲" : "▼"}</span>
+                            </button>
+                            {roleFilterOpen && (
+                                <div style = {{position: "absolute", top: "100%", left: 0, backgroundColor: "#141414", border: "1px solid #262626", borderRadius: "4px", zIndex: 100, minWidth: "150px", marginTop: "4px"}}>
+                                    <div
+                                        onClick = {() => setRoleFilter([])}
+                                        style = {{padding: "8px 12px", cursor: "pointer", fontSize: "13px", color: "#a3a3a3", display: "flex", gap: "8px", alignItems: "center"}}
+                                    >
+                                        <span>{roleFilter.length === 0 ? "☑" : "☐"}</span>
+                                        All Roles
+                                    </div>
+                                    {customRoles.map(r => (
+                                        <div
+                                            key = {r.id}
+                                            onClick = {() => {
+                                                if (roleFilter.includes(r.id)) {
+                                                    setRoleFilter(roleFilter.filter(id => id !== r.id))
+                                                } else {
+                                                    setRoleFilter([...roleFilter, r.id])
+                                                }
+                                            }}
+                                            style = {{padding: "8px 12px", cursor: "pointer", fontSize: "13px", color: "#ffffff", display: "flex", gap: "8px", alignItems: "center", backgroundColor: roleFilter.includes(r.id) ? "#1e1e1e" : "transparent"}}
+                                        >
+                                            <span>{roleFilter.includes(r.id) ? "☑" : "☐"}</span>
+                                            {r.name}
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
                     </div>
 
                     {/* Create case form */}
@@ -244,12 +339,110 @@ export default function Cases() {
                             <select
                                 value = {newCase.priority}
                                 onChange = {(e) => setNewCase({...newCase, priority: e.target.value})}
-                                style = {{display: "block", width: "100%", marginBottom: "8px", padding: "6px", boxSizing: "border-box", backgroundColor: "#141414"}}
+                                style = {{display: "block", width: "100%", marginBottom: "8px", padding: "6px", boxSizing: "border-box", backgroundColor: "#141414", color: "#a3a3a3"}}
                             >
                                 <option value = "low">Low</option>
                                 <option value = "medium">Medium</option>
                                 <option value = "high">High</option>
                             </select>
+
+                            {/* User assignment */}
+                            <div style = {{position: "relative", marginBottom: "8px"}}>
+                                <button
+                                    onClick = {() => setCreateUserOpen(!createUserOpen)}
+                                    style = {{width: "100%", backgroundColor: "#141414", border: "1px solid #262626", color: newCase.assignee_id ? "#ffffff" : "#a3a3a3", padding: "6px 8px", borderRadius: "4px", fontSize: "12px", cursor: "pointer", display: "flex", justifyContent: "space-between", boxSizing: "border-box"}}
+                                >
+                                    <span>{newCase.assignee_id ? users.find(u => u.id === parseInt(newCase.assignee_id))?.name : "Assign to user..."}</span>
+                                    <span>{createUserOpen ? "▲" : "▼"}</span>
+                                </button>
+                                {createUserOpen && (
+                                    <div style = {{position: "absolute", top: "100%", left: 0, right: 0, backgroundColor: "#141414", border: "1px solid #262626", borderRadius: "4px", zIndex: 100, maxHeight: "150px", overflowY: "auto", marginTop: "2px"}}>
+                                        <div
+                                            onClick = {() => setNewCase({...newCase, assignee_id: ""})}
+                                            style = {{padding: "8px 12px", cursor: "pointer", fontSize: "13px", color: "#a3a3a3", display: "flex", gap: "8px"}}
+                                        >
+                                            <span>{!newCase.assignee_id ? "☑" : "☐"}</span>
+                                            Unassigned
+                                        </div>
+                                        {users.map(u => (
+                                            <div
+                                                key = {u.id}
+                                                onClick = {() => setNewCase({...newCase, assignee_id: String(u.id)})}
+                                                style = {{padding: "8px 12px", cursor: "pointer", fontSize: "13px", color: "#ffffff", display: "flex", gap: "8px", backgroundColor: newCase.assignee_id === String(u.id) ? "#1e1e1e" : "transparent"}}
+                                            >
+                                                <span>{newCase.assignee_id === String(u.id) ? "☑" : "☐"}</span>
+                                                {u.name}
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Group assignment */}
+                            <div style = {{position: "relative", marginBottom: "8px"}}>
+                                <button
+                                    onClick = {() => setCreateGroupOpen(!createGroupOpen)}
+                                    style = {{width: "100%", backgroundColor: "#141414", border: "1px solid #262626", color: newCase.group_id ? "#ffffff" : "#a3a3a3", padding: "6px 8px", borderRadius: "4px", fontSize: "12px", cursor: "pointer", display: "flex", justifyContent: "space-between", boxSizing: "border-box"}}
+                                >
+                                    <span>{newCase.group_id ? groups.find(g => g.id === parseInt(newCase.group_id))?.name : "Assign to group..."}</span>
+                                    <span>{createGroupOpen ? "▲" : "▼"}</span>
+                                </button>
+                                {createGroupOpen && (
+                                    <div style = {{position: "absolute", top: "100%", left: 0, right: 0, backgroundColor: "#141414", border: "1px solid #262626", borderRadius: "4px", zIndex: 100, maxHeight: "150px", overflowY: "auto", marginTop: "2px"}}>
+                                        <div
+                                            onClick = {() => setNewCase({...newCase, group_id: ""})}
+                                            style = {{padding: "8px 12px", cursor: "pointer", fontSize: "13px", color: "#a3a3a3", display: "flex", gap: "8px"}}
+                                        >
+                                            <span>{!newCase.group_id ? "☑" : "☐"}</span>
+                                            No Group
+                                        </div>
+                                        {groups.map(g => (
+                                            <div
+                                                key = {g.id}
+                                                onClick = {() => setNewCase({...newCase, group_id: String(g.id)})}
+                                                style = {{padding: "8px 12px", cursor: "pointer", fontSize: "13px", color: "#ffffff", display: "flex", gap: "8px", backgroundColor: newCase.group_id === String(g.id) ? "#1e1e1e" : "transparent"}}
+                                            >
+                                                <span>{newCase.group_id === String(g.id) ? "☑" : "☐"}</span>
+                                                {g.name}
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+
+
+                            {/* Role assignment */}
+                            <div style = {{position: "relative", marginBottom: "8px"}}>
+                                <button
+                                    onClick = {() => setCreateRoleOpen(!createRoleOpen)}
+                                    style = {{width: "100%", backgroundColor: "#141414", border: "1px solid #262626", color: newCase.custom_role_id ? "#ffffff" : "#a3a3a3", padding: "6px 8px", borderRadius: "4px", fontSize: "12px", cursor: "pointer", display: "flex", justifyContent: "space-between", boxSizing: "border-box"}}
+                                >
+                                    <span>{newCase.custom_role_id ? customRoles.find(r => r.id === parseInt(newCase.custom_role_id))?.name : "Assign to role..."}</span>
+                                    <span>{createRoleOpen ? "▲" : "▼"}</span>
+                                </button>
+                                {createRoleOpen && (
+                                    <div style = {{position: "absolute", top: "100%", left: 0, right: 0, backgroundColor: "#141414", border: "1px solid #262626", borderRadius: "4px", zIndex: 100, maxHeight: "150px", overflowY: "auto", marginTop: "2px"}}>
+                                        <div
+                                            onClick = {() => setNewCase({...newCase, custom_role_id: ""})}
+                                            style = {{padding: "8px 12px", cursor: "pointer", fontSize: "13px", color: "#a3a3a3", display: "flex", gap: "8px"}}
+                                        >
+                                            <span>{!newCase.custom_role_id ? "☑" : "☐"}</span>
+                                            No Role
+                                        </div>
+                                        {customRoles.map(r => (
+                                            <div
+                                                key = {r.id}
+                                                onClick = {() => setNewCase({...newCase, custom_role_id: String(r.id)})}
+                                                style = {{padding: "8px 12px", cursor: "pointer", fontSize: "13px", color: "#ffffff", display: "flex", gap: "8px", backgroundColor: newCase.custom_role_id === String(r.id) ? "#1e1e1e" : "transparent"}}
+                                            >
+                                                <span>{newCase.custom_role_id === String(r.id) ? "☑" : "☐"}</span>
+                                                {r.name}
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+
                             {/* File upload */}
                             <div style = {{marginBottom: "8px"}}>
                                 <input
@@ -394,39 +587,187 @@ export default function Cases() {
                                 </span>
                             </div>
 
-                            {/* Assign to user */}
                             <div style = {{marginTop: "1rem", marginBottom: "1rem"}}>
-                                <span style = {{fontSize: "12px", color: "#a3a3a3"}}>
+                                <span style = {{fontSize: "12px", color: "#a3a3a3", display: "block", marginBottom: "8px"}}>
                                     Assigned to:
                                 </span>
-                                <select
-                                    value = {selectedCase.assignee_id || ""}
-                                    onChange = {async (e) => {
-                                        const assigneeId = e.target.value ? parseInt(e.target.value) : null
-                                        const assigneeName = users.find(u => u.id === assigneeId)?.name || "Unassigned"
-                                        try {
-                                            const res = await updateCase(selectedCase.id, {assignee_id: assigneeId})
-                                            setSelectedCase({...selectedCase, assignee_id: assigneeId})
-                                            setCases(prev => prev.map(c => c.id === selectedCase.id ? {...c, assignee_id: assigneeId} : c))
-                                                
-                                            // Refetch activity after assignee update
-                                            const activityRes = await getCaseActivity(selectedCase.id)
-                                            setActivity(activityRes.data)
-                                            toast.success("Assignee updated")
-                                        }
-                                        catch (err) {
-                                            console.error("Error updating assignee:", err)
-                                        }
-                                    }}
-                                    style = {{marginLeft: "8px",  backgroundColor: "#141414", border: "1px solid #262626", color: "#ffffff", padding: "4px 8px", borderRadius: "4px", fontSize: "12px"}}>
-                                    <option value = "">Unassigned</option>
-                                    {users.map(u => (
-                                        <option key = {u.id} value = {u.id}>
-                                            {u.name}
-                                        </option>
-                                    ))}
-                                </select>
+
+                                {(currentUser?.role === "admin" || currentUser?.role === "owner") ? (
+                                    <>
+                                        {/* User */}
+                                        <div style = {{display: "flex", alignItems: "center", gap: "8px", marginBottom: "6px"}}>
+                                            <span style = {{fontSize: "12px", color: "#737373", width: "60px"}}>User</span>
+                                            <div style = {{position: "relative", flex: 1, maxWidth: "200px"}}>
+                                                <button
+                                                    onClick = {() => setAssignUserOpen(!assignUserOpen)}
+                                                    style = {{width: "100%", backgroundColor: "#141414", border: "1px solid #262626", color: "#ffffff", padding: "4px 8px", borderRadius: "4px", fontSize: "12px", cursor: "pointer", display: "flex", justifyContent: "space-between"}}
+                                                >
+                                                    <span>{selectedCase.assignee_id ? users.find(u => u.id === selectedCase.assignee_id)?.name || "Any" : "Any"}</span>
+                                                    <span>{assignUserOpen ? "▲" : "▼"}</span>
+                                                </button>
+                                                {assignUserOpen && (
+                                                    <div style = {{position: "absolute", top: "100%", left: 0, right: 0, backgroundColor: "#141414", border: "1px solid #262626", borderRadius: "4px", zIndex: 100, maxHeight: "150px", overflowY: "auto", marginTop: "4px"}}>
+                                                        <div
+                                                            onClick = {async () => { await updateCase(selectedCase.id, {assignee_id: null}); setSelectedCase({...selectedCase, assignee_id: null}); setAssignUserOpen(false); toast.success("Assignee updated") }}
+                                                            style = {{padding: "8px 12px", cursor: "pointer", fontSize: "13px", color: "#a3a3a3", display: "flex", gap: "8px"}}
+                                                        >
+                                                            <span>{!selectedCase.assignee_id ? "☑" : "☐"}</span>
+                                                            Any
+                                                        </div>
+                                                        {users.map(u => (
+                                                            <div
+                                                                key = {u.id}
+                                                                onClick = {async () => {
+                                                                    setSelectedCase({...selectedCase, assignee_id: u.id})
+                                                                    setCases(prev => prev.map(c => c.id === selectedCase.id ? {...c, assignee_id: u.id} : c))
+                                                                    setAssignUserOpen(false)
+                                                                    try {
+                                                                        await updateCase(selectedCase.id, {assignee_id: u.id})
+                                                                        setActivity(prev => [{id: Date.now(), action: "case_updated", created_at: new Date().toISOString(),
+                                                                            details: {changed_by: currentUser.name, changes: {assignee_id: u.id, assignee_name: u.name}}
+                                                                        }, ...prev])
+                                                                        toast.success("Assignee updated")
+                                                                    } 
+                                                                    catch (err) {
+                                                                        setSelectedCase({...selectedCase, assignee_id: selectedCase.assignee_id})
+                                                                        toast.error("Failed to update assignee")
+                                                                    }
+                                                                }}                                                               
+                                                                style = {{padding: "8px 12px", cursor: "pointer", fontSize: "13px", color: "#ffffff", display: "flex", gap: "8px", backgroundColor: selectedCase.assignee_id === u.id ? "#1e1e1e" : "transparent"}}
+                                                            >
+                                                                <span>{selectedCase.assignee_id === u.id ? "☑" : "☐"}</span>
+                                                                {u.name}
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+
+                                        {/* Group */}
+                                        <div style = {{display: "flex", alignItems: "center", gap: "8px", marginBottom: "6px"}}>
+                                            <span style = {{fontSize: "12px", color: "#737373", width: "60px"}}>Group</span>
+                                            <div style = {{position: "relative", flex: 1, maxWidth: "200px"}}>
+                                                <button
+                                                    onClick = {() => setAssignGroupOpen(!assignGroupOpen)}
+                                                    style = {{width: "100%", backgroundColor: "#141414", border: "1px solid #262626", color: "#ffffff", padding: "4px 8px", borderRadius: "4px", fontSize: "12px", cursor: "pointer", display: "flex", justifyContent: "space-between"}}
+                                                >
+                                                    <span>{selectedCase.group_id ? groups.find(g => g.id === selectedCase.group_id)?.name || "Any" : "Any"}</span>
+                                                    <span>{assignGroupOpen ? "▲" : "▼"}</span>
+                                                </button>
+                                                {assignGroupOpen && (
+                                                    <div style = {{position: "absolute", top: "100%", left: 0, right: 0, backgroundColor: "#141414", border: "1px solid #262626", borderRadius: "4px", zIndex: 100, maxHeight: "150px", overflowY: "auto", marginTop: "4px"}}>
+                                                        <div
+                                                            onClick = {async () => { await updateCase(selectedCase.id, {group_id: null}); setSelectedCase({...selectedCase, group_id: null}); setAssignGroupOpen(false); toast.success("Group updated") }}
+                                                            style = {{padding: "8px 12px", cursor: "pointer", fontSize: "13px", color: "#a3a3a3", display: "flex", gap: "8px"}}
+                                                        >
+                                                            <span>{!selectedCase.group_id ? "☑" : "☐"}</span>
+                                                            Any
+                                                        </div>
+                                                        {groups.map(g => (
+                                                            <div
+                                                                key = {g.id}
+                                                                onClick = {async () => {
+                                                                    setSelectedCase({...selectedCase, group_id: g.id})
+                                                                    setAssignGroupOpen(false)
+                                                                    try {
+                                                                        await updateCase(selectedCase.id, {group_id: g.id})
+                                                                        setActivity(prev => [{id: Date.now(), action: "case_updated", created_at: new Date().toISOString(),
+                                                                            details: {changed_by: currentUser.name, changes: {group_id: g.id, group_name: g.name}}
+                                                                        }, ...prev])
+                                                                        toast.success("Group updated")
+                                                                    } 
+                                                                    catch (err) {
+                                                                        setSelectedCase({...selectedCase, group_id: selectedCase.group_id})
+                                                                        toast.error("Failed to update group")
+                                                                    }
+                                                                }}                                                                
+                                                                style = {{padding: "8px 12px", cursor: "pointer", fontSize: "13px", color: "#ffffff", display: "flex", gap: "8px", backgroundColor: selectedCase.group_id === g.id ? "#1e1e1e" : "transparent"}}
+                                                            >
+                                                                <span>{selectedCase.group_id === g.id ? "☑" : "☐"}</span>
+                                                                {g.name}
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+
+                                        {/* Role */}
+                                        <div style = {{display: "flex", alignItems: "center", gap: "8px"}}>
+                                            <span style = {{fontSize: "12px", color: "#737373", width: "60px"}}>Role</span>
+                                            <div style = {{position: "relative", flex: 1, maxWidth: "200px"}}>
+                                                <button
+                                                    onClick = {() => setAssignRoleOpen(!assignRoleOpen)}
+                                                    style = {{width: "100%", backgroundColor: "#141414", border: "1px solid #262626", color: "#ffffff", padding: "4px 8px", borderRadius: "4px", fontSize: "12px", cursor: "pointer", display: "flex", justifyContent: "space-between"}}
+                                                >
+                                                    <span>{selectedCase.custom_role_id ? customRoles.find(r => r.id === selectedCase.custom_role_id)?.name || "Any" : "Any"}</span>
+                                                    <span>{assignRoleOpen ? "▲" : "▼"}</span>
+                                                </button>
+                                                {assignRoleOpen && (
+                                                    <div style = {{position: "absolute", top: "100%", left: 0, right: 0, backgroundColor: "#141414", border: "1px solid #262626", borderRadius: "4px", zIndex: 100, maxHeight: "150px", overflowY: "auto", marginTop: "4px"}}>
+                                                        <div
+                                                            onClick = {async () => { await updateCase(selectedCase.id, {custom_role_id: null}); setSelectedCase({...selectedCase, custom_role_id: null}); setAssignRoleOpen(false); toast.success("Role updated") }}
+                                                            style = {{padding: "8px 12px", cursor: "pointer", fontSize: "13px", color: "#a3a3a3", display: "flex", gap: "8px"}}
+                                                        >
+                                                            <span>{!selectedCase.custom_role_id ? "☑" : "☐"}</span>
+                                                            Any
+                                                        </div>
+                                                        {customRoles.map(r => (
+                                                            <div
+                                                                key = {r.id}
+                                                                onClick = {async () => {
+                                                                    setSelectedCase({...selectedCase, custom_role_id: r.id})
+                                                                    setAssignRoleOpen(false)
+                                                                    try {
+                                                                        await updateCase(selectedCase.id, {custom_role_id: r.id})
+                                                                        setActivity(prev => [{id: Date.now(), action: "case_updated", created_at: new Date().toISOString(),
+                                                                            details: {changed_by: currentUser.name, changes: {custom_role_id: r.id, role_name: r.name}}
+                                                                        }, ...prev])
+                                                                        toast.success("Role updated")
+                                                                    } 
+                                                                    catch (err) {
+                                                                        setSelectedCase({...selectedCase, custom_role_id: selectedCase.custom_role_id})
+                                                                        toast.error("Failed to update role")
+                                                                    }
+                                                                }}                                                              
+                                                                style = {{padding: "8px 12px", cursor: "pointer", fontSize: "13px", color: "#ffffff", display: "flex", gap: "8px", backgroundColor: selectedCase.custom_role_id === r.id ? "#1e1e1e" : "transparent"}}
+                                                            >
+                                                                <span>{selectedCase.custom_role_id === r.id ? "☑" : "☐"}</span>
+                                                                {r.name}
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </>
+                                ) : (
+
+                                    // Member read-only view
+                                    <div style = {{display: "flex", flexDirection: "column", gap: "6px"}}>
+                                        <div style = {{display: "flex", alignItems: "center", gap: "8px"}}>
+                                            <span style = {{fontSize: "12px", color: "#737373", width: "60px"}}>User</span>
+                                            <span style = {{fontSize: "12px", color: "#ffffff"}}>
+                                                {selectedCase.assignee_id ? users.find(u => u.id === selectedCase.assignee_id)?.name || "Unassigned" : "Unassigned"}
+                                            </span>
+                                        </div>
+                                        <div style = {{display: "flex", alignItems: "center", gap: "8px"}}>
+                                            <span style = {{fontSize: "12px", color: "#737373", width: "60px"}}>Group</span>
+                                            <span style = {{fontSize: "12px", color: "#ffffff"}}>
+                                                {selectedCase.group_id ? groups.find(g => g.id === selectedCase.group_id)?.name || "None" : "None"}
+                                            </span>
+                                        </div>
+                                        <div style = {{display: "flex", alignItems: "center", gap: "8px"}}>
+                                            <span style = {{fontSize: "12px", color: "#737373", width: "60px"}}>Role</span>
+                                            <span style = {{fontSize: "12px", color: "#ffffff"}}>
+                                                {selectedCase.custom_role_id ? customRoles.find(r => r.id === selectedCase.custom_role_id)?.name || "None" : "None"}
+                                            </span>
+                                        </div>
+                                    </div>
+                                )}
                             </div>
+                        
 
                             {/* Created by */}
                             {selectedCase.created_by_name && (
@@ -559,7 +900,7 @@ export default function Cases() {
                                                 <div>
                                                     <p style = {{fontSize: "12px", color: "#ffffff", marginBottom: "2px"}}> 
 
-                                                        {/* Alteration of display for user changing user, user changing assignment progress */}
+                                                        {/* Alteration of display for user changing user, assignment, group, and role*/}
                                                         {log.details?.changed_by && (
                                                             <span style = {{color: "#ffffff", fontWeight: "700"}}>{log.details.changed_by} </span>
                                                         )}
@@ -571,6 +912,12 @@ export default function Cases() {
                                                             <span> → assigned to <span style = {{color: "#ffffff", fontWeight: "700"}}>{log.details.changes.assignee_name}</span></span>
                                                         )}
                                                         {log.details?.changes?.assignee_id === null && ` → unassigned`}
+                                                        {log.details?.changes?.group_id !== undefined && (
+                                                            <span> → group changed to <span style = {{color: "#ffffff", fontWeight: "700"}}>{log.details.changes.group_name || "None"}</span></span>
+                                                        )}
+                                                        {log.details?.changes?.custom_role_id !== undefined && (
+                                                            <span> → role changed to <span style = {{color: "#ffffff", fontWeight: "700"}}>{log.details.changes.role_name || "None"}</span></span>
+                                                        )}
                                                     </p>
                                                     <p style = {{fontSize: "11px", color: "#a3a3a3"}}>
                                                         {new Date(log.created_at).toLocaleString()}

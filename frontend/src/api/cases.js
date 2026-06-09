@@ -1,7 +1,7 @@
 import api from './axios'
 
 // Wrap api calls
-export const getCases = (assignedToMe = false, search = "", priority = "", status = "") => api.get(`/cases?assigned_to_me=${assignedToMe}${search ? `&search=${search}` : ""}${priority ? `&priority=${priority}` : ""}${status ? `&status=${status}` : ""}`)
+export const getCases = (assignedToMe = false, search = "", priority = "", status = "", groupIds = [], roleIds = []) => api.get(`/cases?assigned_to_me=${assignedToMe}${search ? `&search=${search}` : ""}${priority ? `&priority=${priority}` : ""}${status ? `&status=${status}` : ""}${groupIds.map(id => `&group_id=${id}`).join('')}${roleIds.map(id => `&custom_role_id=${id}`).join('')}`)
 export const getCase = (id) => api.get(`/cases/${id}`)
 export const createCase = (data, file = null) => {
 
@@ -12,6 +12,8 @@ export const createCase = (data, file = null) => {
     if (data.priority) formData.append('priority', data.priority)
     if (data.assignee_id) formData.append('assignee_id', data.assignee_id)
     if (file) formData.append('file', file)
+    if (data.group_id) formData.append('group_id', data.group_id)
+    if (data.custom_role_id) formData.append('custom_role_id', data.custom_role_id)
     
     return api.post('/cases', formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
@@ -24,4 +26,6 @@ export const getCaseActivity = (id) => api.get(`/cases/${id}/activity`)
 export const downloadFile = (id) => api.get(`/cases/${id}/file`, {responseType: 'blob'})
 export const getComments = (id) => api.get(`/cases/${id}/comments`)
 export const addComment = (id, data) => api.post(`/cases/${id}/comments`, data)
-export const exportCases = (assignedToMe = false, search = "", priority = "", status = "") =>api.get(`/cases/export/csv?assigned_to_me=${assignedToMe}${search ? `&search=${search}` : ""}${priority ? `&priority=${priority}` : ""}${status ? `&status=${status}` : ""}`, {responseType: 'blob'})
+export const exportCases = (assignedToMe = false, search = "", priority = "", status = "", groupIds = [], roleIds = []) => api.get(`/cases/export/csv?assigned_to_me=${assignedToMe}${search ? `&search=${search}` : ""}${priority ? `&priority=${priority}` : ""}${status ? `&status=${status}` : ""}${groupIds.length > 0 ? groupIds.map(id => `&group_id=${id}`).join('') : ""}${roleIds.length > 0 ? roleIds.map(id => `&custom_role_id=${id}`).join('') : ""}`, {responseType: 'blob'})
+export const getGroups = () => api.get('/groups')
+export const getCustomRoles = () => api.get('/custom-roles')

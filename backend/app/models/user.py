@@ -19,3 +19,5 @@ class User(Base):
     activity_logs = relationship("ActivityLog", back_populates = "user")
     comments = relationship("Comment", back_populates = "author", cascade = "all, delete-orphan")
     organization = relationship("Organization", back_populates = "users")
+    group_memberships = relationship("GroupMember", back_populates = "user", cascade = "all, delete-orphan")
+    user_roles = relationship("UserRole", back_populates = "user", cascade = "all, delete-orphan")
