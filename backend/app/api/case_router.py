@@ -99,6 +99,7 @@ def export_cases_csv(db: Session = Depends(get_db), current_user: User = Depends
         writer.writerow([case.id, case.title, case.description or "", case.status, case.priority or "", case.category or "", case.summary or "", case.assignee_id or "", case.created_at.strftime("%Y-%m-%d %H:%M") if case.created_at else ""
         ])
     
+    # Return as file response
     output.seek(0)
     return StreamingResponse(
         iter([output.getvalue()]),
