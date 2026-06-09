@@ -1,5 +1,5 @@
 import {useState, useEffect} from "react";
-import {getCases, updateCase, deleteCase, createCase, getUsers, getCaseActivity, downloadFile, getComments, addComment} from "../api/cases";
+import {getCases, updateCase, deleteCase, createCase, getUsers, getCaseActivity, downloadFile, getComments, addComment, getCase, exportCases} from "../api/cases";
 import ReactMarkdown from "react-markdown";
 import Sidebar from "../components/Sidebar"
 import {toast} from "sonner"
@@ -21,6 +21,8 @@ export default function Cases() {
     const [newComment, setNewComment] = useState("")
     const [showComments, setShowComments] = useState(false)
     const [creating, setCreating] = useState(false)
+    const [priorityFilter, setPriorityFilter] = useState("")
+    const [statusFilter, setStatusFilter] = useState("")
 
     // Fetch all cases when page loads
     useEffect(() => {
@@ -83,15 +85,18 @@ export default function Cases() {
         }
     }
 
-    // Updated: now fetches activity and comments
+    // Updated: now fetches activity, comments, and who created the case
     const handleSelectCase = async (c) => {
         setSelectedCase(c)
         setShowActivity(false)
+        setShowComments(false)
         try {
-            const [activityRes, commentsRes] = await Promise.all([
+            const [caseRes, activityRes, commentsRes] = await Promise.all([
+            getCase(c.id),
             getCaseActivity(c.id),
             getComments(c.id)
             ])
+        setSelectedCase(caseRes.data) // Update selected case to pass creator name 
         setActivity(activityRes.data)
         setComments(commentsRes.data)
         }
@@ -104,7 +109,7 @@ export default function Cases() {
     useEffect(() => {
         const fetchWithSearch = async () => {
             try {
-                const res = await getCases(myCases, search)
+                const res = await getCases(myCases, search, priorityFilter, statusFilter)
                 setCases(res.data)
             } 
             catch (err) {
@@ -115,7 +120,7 @@ export default function Cases() {
         // Debounce each time with 300ms so router isnt constantly spamming backend
         const timer = setTimeout(fetchWithSearch, 300)
         return () => clearTimeout(timer)
-    }, [search, myCases])
+    }, [search, myCases, priorityFilter, statusFilter])
 
     if (loading) {return <div>Loading...</div>}
 
@@ -127,45 +132,88 @@ export default function Cases() {
                 <Sidebar />
 
                 {/* Case list panel */}
-                <div style = {{width: "300px", minWidth: "300px", borderRight: "1px solid #262626", overflowY: "auto", backgroundColor: "#0a0a0a", display: "flex", flexDirection: "column"}}>
+                <div style = {{width: "400px", borderRight: "1px solid #262626", overflowY: "auto", backgroundColor: "#0a0a0a", display: "flex", flexDirection: "column"}}>
 
                     {/* Case list header */}
                     <div style = {{padding: "12px 16px", borderBottom: "1px solid #262626", display: "flex", justifyContent: "space-between", alignItems: "center"}}>
                         <div style = {{display: "flex", alignItems: "center", gap: "8px"}}>
-                            <span style = {{fontSize: "13px", fontWeight: "500", color: "#f5f5f5"}}>
+                            <span style = {{fontSize: "13px", fontWeight: "500", color: "#ffffff"}}>
                                 Cases
                             </span>
                             <button
                                 onClick = {() => setMyCases(!myCases)}
                                 style = {{
                                     backgroundColor: myCases ? "#ffffff" : "#ffffff", color: myCases ? "#0a0a0a" : "#0a0a0a", border: "1px solid #262626", borderRadius: "4px", padding: "2px 8px",
-                                    fontSize: "11px",
+                                    fontSize: "12px",
                                     cursor: "pointer"
                                 }}
                             >
                                 {myCases ? "All Cases" : "My Cases"}
                             </button>
                         </div>
-                        <button
-                            onClick = {() => setShowForm(!showForm)}
-                            style = {{backgroundColor: "#ffffff", color: "#0a0a0a", border: "none", borderRadius: "4px", padding: "4px 10px", fontSize: "12px", cursor: "pointer"}}
-                        >
-                            + New
-                        </button>
+                        <div style = {{display: "flex", gap: "8px"}}>
+                            <button
+                                onClick = {() => setShowForm(!showForm)}
+                                style = {{backgroundColor: "#ffffff", color: "#0a0a0a", border: "1px solid #262626", borderRadius: "4px", padding: "2px 8px", fontSize: "12px", cursor: "pointer"}}
+                            >
+                                + New
+                            </button>
+
+                            {/* Export button */}
+                            <button
+                                onClick = {async () => {
+                                    try {
+                                        const res = await exportCases(myCases, search, priorityFilter, statusFilter)
+                                        const url = window.URL.createObjectURL(new Blob([res.data]))
+                                        const link = document.createElement('a')
+                                        link.href = url
+                                        link.setAttribute('download', 'cases.csv')
+                                        document.body.appendChild(link)
+                                        link.click()
+                                        link.remove()
+                                        toast.success("Cases exported")
+                                    } catch (err) {
+                                        toast.error("Failed to export cases")
+                                    }
+                                }}
+                                style = {{backgroundColor: "#ffffff", color: "#0a0a0a", border: "1px solid #262626", borderRadius: "4px", padding: "2px 8px", fontSize: "12px", cursor: "pointer"}}
+                            >
+                                Export
+                            </button>
+                        </div>
                     </div>
 
-                    <div style = {{padding: "8px 16px", borderBottom: "1px solid #262626"}}>
+                    <div style = {{padding: "8px 16px", borderBottom: "1px solid #262626", display: "flex", gap: "8px"}}>
                         <input
                             type = "text"
                             placeholder = "Search cases..."
                             value = {search}
                             onChange = {(e) => setSearch(e.target.value)}
                             style = {{
-                                width: "100%", padding: "6px 10px", backgroundColor: "#141414", border: "1px solid #262626", borderRadius: "4px", fontSize: "12px",
-                                color: "#f5f5f5",
-                                boxSizing: "border-box"
-                            }}
+                                width: "100%", padding: "6px 10px", backgroundColor: "#141414", border: "1px solid #262626", borderRadius: "4px", fontSize: "12px", color: "#ffffff", boxSizing: "border-box"}}
                         />
+                        <select
+                            value = {priorityFilter}
+                            onChange = {(e) => setPriorityFilter(e.target.value)}
+                            style = {{
+                                backgroundColor: "#141414", border: "1px solid #262626", borderRadius: "4px", color: "#ffffff", padding: "5px 8px", fontSize: "12px", cursor: "pointer"}}
+                        >
+                            <option value = "">All Priority</option>
+                            <option value = "high">High</option>
+                            <option value = "medium">Medium</option>
+                            <option value = "low">Low</option>
+                        </select>
+                        <select
+                            value = {statusFilter}
+                            onChange = {(e) => setStatusFilter(e.target.value)}
+                            style = {{
+                                backgroundColor: "#141414", border: "1px solid #262626", borderRadius: "4px", color: "#ffffff", padding: "5px 5px", fontSize: "12px", cursor: "pointer"}}
+                        >
+                            <option value = "">All Status</option>
+                            <option value = "open">Open</option>
+                            <option value = "in progress">In Progress</option>
+                            <option value = "resolved">Resolved</option>
+                        </select>
                     </div>
 
                     {/* Create case form */}
@@ -231,7 +279,7 @@ export default function Cases() {
                                 <div style = {{fontSize: "11px", color: "#a3a3a3", marginBottom: "6px"}}>
                                     #{c.id}
                                 </div>
-                                <div style = {{fontWeight: "500", fontSize: "13px", color: "#f5f5f5", marginBottom: "6px", lineHeight: "1.4"}}>
+                                <div style = {{fontWeight: "500", fontSize: "13px", color: "#ffffff", marginBottom: "6px", lineHeight: "1.4"}}>
                                     {c.title}
                                 </div>
                                 <div style = {{fontSize: "12px", color: "#a3a3a3", display: "flex", alignItems: "center", gap: "6px"}}>
@@ -309,7 +357,7 @@ export default function Cases() {
                                         }
                                     }}
                                     style = {{
-                                        backgroundColor: "#141414", border: "1px solid #262626", color: "#f5f5f5", padding: "4px 8px", borderRadius: "4px", fontSize: "12px"}}
+                                        backgroundColor: "#141414", border: "1px solid #262626", color: "#ffffff", padding: "4px 8px", borderRadius: "4px", fontSize: "12px"}}
                                     >
                                     <option value = "open">Open</option>
                                     <option value = "in progress">In Progress</option>
@@ -359,7 +407,7 @@ export default function Cases() {
                                             console.error("Error updating assignee:", err)
                                         }
                                     }}
-                                    style = {{marginLeft: "8px",  backgroundColor: "#141414", border: "1px solid #262626", color: "#f5f5f5", padding: "4px 8px", borderRadius: "4px", fontSize: "12px"}}>
+                                    style = {{marginLeft: "8px",  backgroundColor: "#141414", border: "1px solid #262626", color: "#ffffff", padding: "4px 8px", borderRadius: "4px", fontSize: "12px"}}>
                                     <option value = "">Unassigned</option>
                                     {users.map(u => (
                                         <option key = {u.id} value = {u.id}>
@@ -368,6 +416,18 @@ export default function Cases() {
                                     ))}
                                 </select>
                             </div>
+
+                            {/* Created by */}
+                            {selectedCase.created_by_name && (
+                                <div style = {{marginBottom: "1rem"}}>
+                                    <span style = {{fontSize: "12px", color: "#a3a3a3"}}>
+                                        Created by:
+                                    </span>
+                                    <span style = {{fontSize: "12px", color: "#ffffff", marginLeft: "8px"}}>
+                                        {selectedCase.created_by_name}
+                                    </span>
+                                </div>
+                            )}
                             <hr style = {{borderColor: "#262626", margin: "1rem 0"}} />
 
                             {/* Description */}
@@ -375,7 +435,7 @@ export default function Cases() {
                                 <p style = {{fontSize: "11px", fontWeight: "500", color: "#a3a3a3", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "8px"}}>
                                     Description
                                 </p>
-                                <p style = {{color: "#a3a3a3", fontSize: "13px", lineHeight: "1.6"}}>
+                                <p style = {{color: "#ffffff", fontSize: "13px", lineHeight: "1.6"}}>
                                     {selectedCase.description}
                                 </p>
                             </div>
@@ -387,13 +447,14 @@ export default function Cases() {
                                         Attached File
                                     </p>
                                     <div style = {{display: "flex", alignItems: "center", justifyContent: "space-between"}}>
-                                        <span style = {{fontSize: "13px", color: "#f5f5f5"}}>
+                                        <span style = {{fontSize: "13px", color: "#ffffff"}}>
                                             {selectedCase.file_name}
                                         </span>
                                         <button
                                             onClick = {async () => {
                                                 try {
                                                     const res = await downloadFile(selectedCase.id)
+
                                                     // Create a download link and click it
                                                     const url = window.URL.createObjectURL(new Blob([res.data]))
                                                     const link = document.createElement('a')
@@ -425,7 +486,7 @@ export default function Cases() {
                                     <span style = {{fontSize: "12px", color: "#a3a3a3"}}>
                                         Classification
                                     </span>
-                                    <p style = {{fontSize: "13px", color: "#f5f5f5", marginTop: "4px"}}>
+                                    <p style = {{fontSize: "13px", color: "#ffffff", marginTop: "4px"}}>
                                         {selectedCase.category || "Not classified"}
                                     </p>
                                 </div>
@@ -435,7 +496,7 @@ export default function Cases() {
                                     <span style = {{fontSize: "12px", color: "#a3a3a3"}}>
                                         Summary
                                     </span>
-                                    <p style = {{fontSize: "13px", color: "#f5f5f5", marginTop: "4px", lineHeight: "1.5"}}>
+                                    <p style = {{fontSize: "13px", color: "#ffffff", marginTop: "4px", lineHeight: "1.5"}}>
                                         {selectedCase.summary || "No summary"}
                                     </p>
                                 </div>
@@ -445,13 +506,13 @@ export default function Cases() {
                                     <span style = {{fontSize: "12px", color: "#a3a3a3"}}>
                                         Recommendations
                                     </span>
-                                    <div style = {{fontSize: "13px", color: "#f5f5f5", marginTop: "8px", lineHeight: "1.8"}}>
+                                    <div style = {{fontSize: "13px", color: "#ffffff", marginTop: "8px", lineHeight: "1.8"}}>
                                         <ReactMarkdown
                                             components={{
                                                 ol: ({node, ...props}) => <ol style = {{paddingLeft: "13px", margin: "0"}} {...props} />, // Componenets for alignment of AI recommendations
                                                 ul: ({node, ...props}) => <ul style = {{paddingLeft: "13px", margin: "0"}} {...props} />,
                                                 li: ({node, ...props}) => <li style = {{marginBottom: "8px"}} {...props} />,
-                                                strong: ({node, ...props}) => <strong style = {{color: "#f5f5f5"}} {...props} />,
+                                                strong: ({node, ...props}) => <strong style = {{color: "#ffffff"}} {...props} />,
                                                 p: ({node, ...props}) => <p style = {{margin: "0"}} {...props} />
                                             }}>
                                             {selectedCase.recommendation || "No recommendations"}
@@ -462,6 +523,7 @@ export default function Cases() {
 
                             {/* Activity log */}
                             <div style = {{backgroundColor: "#141414", border: "1px solid #262626", borderRadius: "8px", padding: "1rem", marginBottom: "1rem"}}>
+
                                 {/* Clickable header */}
                                 <div
                                     onClick = {() => setShowActivity(!showActivity)}
@@ -483,7 +545,8 @@ export default function Cases() {
                                             >
                                                 <div style = {{width: "8px", height: "8px", borderRadius: "50%", backgroundColor: "#ffffff", marginTop: "4px", flexShrink: 0}} />
                                                 <div>
-                                                    <p style = {{fontSize: "12px", color: "#f5f5f5", marginBottom: "2px"}}> 
+                                                    <p style = {{fontSize: "12px", color: "#ffffff", marginBottom: "2px"}}> 
+
                                                         {/* Alteration of display for user changing user, user changing assignment progress */}
                                                         {log.details?.changed_by && (
                                                             <span style = {{color: "#ffffff", fontWeight: "700"}}>{log.details.changed_by} </span>
@@ -543,7 +606,7 @@ export default function Cases() {
                                                                 {new Date(comment.created_at).toLocaleString()}
                                                             </span>
                                                         </div>
-                                                        <p style = {{fontSize: "13px", color: "#f5f5f5", lineHeight: "1.5"}}>
+                                                        <p style = {{fontSize: "13px", color: "#ffffff", lineHeight: "1.5"}}>
                                                             {comment.body}
                                                         </p>
                                                     </div>
@@ -562,7 +625,7 @@ export default function Cases() {
                                                     onChange = {(e) => setNewComment(e.target.value)}
                                                     style = {{
                                                         display: "block", width: "100%", padding: "8px", backgroundColor: "#0a0a0a",
-                                                        border: "1px solid #262626", borderRadius: "4px", color: "#f5f5f5",
+                                                        border: "1px solid #262626", borderRadius: "4px", color: "#ffffff",
                                                         fontSize: "13px", resize: "vertical", boxSizing: "border-box", marginBottom: "8px"
                                                     }}
                                                 />

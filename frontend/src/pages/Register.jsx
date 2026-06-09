@@ -31,8 +31,8 @@ export default function Register() {
     }
 
     return (
-        <div style = {{width: "500px", margin: "60px auto", padding: "2rem"}}>
-            <div style = {{textAlign: "center", marginBottom: "-30px", paddingBottom: "1rem"}}>
+        <div style = {{width: "500px", margin: "60px auto", padding: "1rem"}}>
+            <div style = {{textAlign: "center", marginBottom: "-30px", paddingBottom: "3rem"}}>
             <p
                 onClick = {() => navigate("/landing")}
                 style = {{fontSize: "25px", fontWeight: "600", cursor: "pointer", color: "#ffffff", marginBottom: "8px"}}

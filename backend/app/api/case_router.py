@@ -1,7 +1,7 @@
 # REST endpoints for creating, listing, retrieving, and updating cases.
 # It handles request validation and delegates business logic to case_service.
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, StreamingResponse
 from sqlalchemy.orm import Session
 from typing import List
 from app.core.dependencies import get_current_user
@@ -9,6 +9,8 @@ from app.models.user import User
 from app.models.case import Case
 import os
 import uuid
+import csv
+import io
 
 from app.schemas.case import CaseCreate, CaseRead, CaseUpdate
 from app.schemas.activity_log import ActivityLogRead
@@ -44,13 +46,13 @@ async def create_case_endpoint(title: str = Form(...), description: str | None =
             f.write(file_bytes)
     
     # Now pass in new case with file components
-    new_case = create_case(db, title, description, assignee_id, priority, file_content, file_path, file_name, current_user.org_id)
+    new_case = create_case(db, title, description, assignee_id, priority, file_content, file_path, file_name, current_user.org_id, created_by = current_user.id)
     log_activity(db, new_case.id, current_user.id, "case_created", {"title": new_case.title})
     return new_case
 
 # List all cases based on org (now uses backend search instead of frontend)
 @router.get("/", response_model = List[CaseRead])
-def list_cases(db: Session = Depends(get_db), assigned_to_me: bool = False, search: str | None = None, current_user: User = Depends(get_current_user)):
+def list_cases(db: Session = Depends(get_db), assigned_to_me: bool = False, search: str | None = None, priority: str | None = None, status: str | None = None, current_user: User = Depends(get_current_user)):
     query = db.query(Case).filter(Case.org_id == current_user.org_id)
 
     # If assigned is true, only return cases assigned to curr user
@@ -58,7 +60,50 @@ def list_cases(db: Session = Depends(get_db), assigned_to_me: bool = False, sear
         query = query.filter(Case.assignee_id == current_user.id)
     if search:
         query = query.filter(Case.title.ilike(f"%{search}%") | Case.description.ilike(f"%{search}%"))
+    if priority:
+        query = query.filter(Case.priority == priority)
+    if status:
+        query = query.filter(Case.status == status)
     return query.order_by(Case.created_at.desc()).all()
+
+# Export cases to CSV
+@router.get("/export/csv")
+def export_cases_csv(db: Session = Depends(get_db), current_user: User = Depends(get_current_user), assigned_to_me: bool = False, search: str | None = None, priority: str | None = None, status: str | None = None):
+    query = db.query(Case).filter(Case.org_id == current_user.org_id)
+    
+    if assigned_to_me:
+        query = query.filter(Case.assignee_id == current_user.id)
+    if search:
+        query = query.filter(
+            Case.title.ilike(f"%{search}%") |
+            Case.description.ilike(f"%{search}%")
+        )
+    if priority:
+        query = query.filter(Case.priority == priority)
+    if status:
+        query = query.filter(Case.status == status)
+        
+    # Get case based on query params to export only what user is looking at
+    cases = query.order_by(Case.created_at.desc()).all()
+    
+    # Create CSV in memory
+    output = io.StringIO()
+    writer = csv.writer(output)
+    
+    # Header row
+    writer.writerow(["ID", "Title", "Description", "Status", "Priority", "Category", "Summary", "Assignee ID", "Created At"])
+    
+    # Data rows
+    for case in cases:
+        writer.writerow([case.id, case.title, case.description or "", case.status, case.priority or "", case.category or "", case.summary or "", case.assignee_id or "", case.created_at.strftime("%Y-%m-%d %H:%M") if case.created_at else ""
+        ])
+    
+    output.seek(0)
+    return StreamingResponse(
+        iter([output.getvalue()]),
+        media_type = "text/csv",
+        headers = {"Content-Disposition": "attachment; filename=cases.csv"}
+    )
 
 # Get activity
 @router.get("/{case_id}/activity", response_model = List[ActivityLogRead])
@@ -72,7 +117,12 @@ def get_case_endpoint(case_id: int, db: Session = Depends(get_db), current_user:
     case = get_case(db, case_id)
     if not case:
         raise HTTPException(status_code = 404, detail = "Case not found")
-    return case
+    
+    # Get creator name of case
+    creator = db.query(User).filter(User.id == case.created_by).first()
+    case_data = CaseRead.model_validate(case)
+    case_data.created_by_name = creator.name if creator else "Unknown"
+    return case_data
 
 # Update a case only to change assignee and status
 @router.put("/{case_id}", response_model = CaseRead)
@@ -106,7 +156,7 @@ def delete_case_endpoint(case_id: int, db: Session = Depends(get_db), current_us
 def download_file(case_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     case = get_case(db, case_id)
     if not case:
-        raise HTTPException(status_code=404, detail="Case not found")
+        raise HTTPException(status_code = 404, detail="Case not found")
     if not case.file_path or not os.path.exists(case.file_path):
-        raise HTTPException(status_code=404, detail="No file attached to this case")
-    return FileResponse(case.file_path, filename=case.file_name)
+        raise HTTPException(status_code = 404, detail = "No file attached to this case")
+    return FileResponse(case.file_path, filename = case.file_name)

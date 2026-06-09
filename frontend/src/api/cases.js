@@ -1,7 +1,7 @@
 import api from './axios'
 
 // Wrap api calls
-export const getCases = (assignedToMe = false, search = "") => api.get(`/cases${assignedToMe ? "?assigned_to_me=true" : ""}${search ? `${assignedToMe ? "&" : "?"}search=${search}` : ""}`)
+export const getCases = (assignedToMe = false, search = "", priority = "", status = "") => api.get(`/cases?assigned_to_me=${assignedToMe}${search ? `&search=${search}` : ""}${priority ? `&priority=${priority}` : ""}${status ? `&status=${status}` : ""}`)
 export const getCase = (id) => api.get(`/cases/${id}`)
 export const createCase = (data, file = null) => {
 
@@ -24,3 +24,4 @@ export const getCaseActivity = (id) => api.get(`/cases/${id}/activity`)
 export const downloadFile = (id) => api.get(`/cases/${id}/file`, {responseType: 'blob'})
 export const getComments = (id) => api.get(`/cases/${id}/comments`)
 export const addComment = (id, data) => api.post(`/cases/${id}/comments`, data)
+export const exportCases = (assignedToMe = false, search = "", priority = "", status = "") =>api.get(`/cases/export/csv?assigned_to_me=${assignedToMe}${search ? `&search=${search}` : ""}${priority ? `&priority=${priority}` : ""}${status ? `&status=${status}` : ""}`, {responseType: 'blob'})
