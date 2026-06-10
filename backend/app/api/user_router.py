@@ -50,15 +50,11 @@ def login(user: UserLogin, db: Session = Depends(get_db)):
 def get_me(current_user: User = Depends(get_current_user)):
     return current_user
 
-# For changing user's role, name, pass, custom role, 
+# For changing personal name, pass 
 @router.put("/me", response_model = UserRead)
 def update_me(updates: UserUpdate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     if updates.name:
         current_user.name = updates.name
-    if updates.email:
-        if not re.match(r'^[^@]+@[^@]+\.[^@]+$', updates.email):
-            raise HTTPException(status_code = 400, detail = "Invalid email format")
-        current_user.email = updates.email
     if updates.new_password:
         # Check curr pass first
         if not updates.current_password:
@@ -83,7 +79,7 @@ def update_me(updates: UserUpdate, db: Session = Depends(get_db), current_user: 
 def get_users(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     return db.query(User).filter(User.org_id == current_user.org_id).all()
 
-# Admin creates a new user in their org
+# Admin/owner creates a new user in their org
 @router.post("/create", response_model = UserRead)
 def admin_create_user(data: AdminUserCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     
@@ -99,7 +95,7 @@ def admin_create_user(data: AdminUserCreate, db: Session = Depends(get_db), curr
     db.refresh(new_user)
     return new_user
 
-# Admin deletes a user
+# Admin/owner deletes a user
 @router.delete("/{user_id}", status_code = 204)
 def delete_user(user_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     
@@ -119,7 +115,7 @@ def delete_user(user_id: int, db: Session = Depends(get_db), current_user: User 
     db.commit()
     
     
-# Admin updates a user
+# Admin/owner updates a user
 @router.put("/{user_id}", response_model = UserRead)
 def admin_update_user(user_id: int, data: AdminUserUpdate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     if current_user.role not in ["admin", "owner"]:

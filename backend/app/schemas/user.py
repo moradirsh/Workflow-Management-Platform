@@ -31,10 +31,9 @@ class UserRead(BaseModel):
         "from_attributes": True
     }
     
-# Update user data
+# Update self user data
 class UserUpdate(BaseModel):
     name: str | None = None
-    role: str | None = None
     current_password: str | None = None
     new_password: str | None = None
     
