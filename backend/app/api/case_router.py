@@ -5,8 +5,6 @@ from fastapi.responses import FileResponse, StreamingResponse
 from sqlalchemy.orm import Session
 from typing import List
 from app.core.dependencies import get_current_user
-from app.models.user import User
-from app.models.case import Case
 from datetime import datetime
 from sqlalchemy import or_
 import os
@@ -14,6 +12,9 @@ import uuid
 import csv
 import io
 
+
+from app.models.user import User
+from app.models.case import Case
 from app.schemas.case import CaseCreate, CaseRead, CaseUpdate
 from app.schemas.activity_log import ActivityLogRead
 from app.services.case_service import create_case, get_cases, get_case, update_case, delete_case

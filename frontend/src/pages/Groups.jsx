@@ -1,7 +1,7 @@
-import { useState, useEffect } from "react"
+import {useState, useEffect} from "react"
 import Sidebar from "../components/Sidebar"
 import api from "../api/axios"
-import { toast } from "sonner"
+import {toast} from "sonner"
 
 export default function Groups() {
     const [groups, setGroups] = useState([])
