@@ -10,5 +10,4 @@ def log_activity(db: Session, case_id: int, user_id: int, action: str, details: 
 
 # get all activity logs for a case ordered by most recent initially
 def get_case_activity(db: Session, case_id: int):
-    return db.query(ActivityLog).filter(
-        ActivityLog.case_id == case_id).order_by(ActivityLog.created_at.desc()).all()
+    return db.query(ActivityLog).filter(ActivityLog.case_id == case_id).order_by(ActivityLog.created_at.desc()).all()

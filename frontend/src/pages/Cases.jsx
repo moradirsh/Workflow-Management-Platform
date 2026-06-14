@@ -517,6 +517,7 @@ export default function Cases() {
                                         #{selectedCase.id}
                                     </span>
                                 </h2>
+                                {(currentUser?.role === "admin" || currentUser?.role === "owner") && (
                                 <button
                                     onClick = {async () => {
 
@@ -537,6 +538,7 @@ export default function Cases() {
                                 >
                                     Delete
                                 </button>
+                                )}
                             </div>
 
                             {/* Status badges for (open, in progress, resolved) */}
@@ -567,6 +569,42 @@ export default function Cases() {
                                     <option value = "in progress">In Progress</option>
                                     <option value = "resolved">Resolved</option>
                                 </select>
+                                
+                                {/* Priority dropdown */}
+                                {(currentUser?.role === "admin" || currentUser?.role === "owner") ? (
+                                    <select
+                                        value = {selectedCase.priority || "low"}
+                                        onChange = {async (e) => {
+                                            const newPriority = e.target.value
+                                            try {
+                                                await updateCase(selectedCase.id, {priority: newPriority})
+                                                setSelectedCase({...selectedCase, priority: newPriority})
+                                                setCases(prev => prev.map(c => c.id === selectedCase.id ? {...c, priority: newPriority} : c))
+                                                setActivity(prev => [{id: Date.now(), action: "case_updated", created_at: new Date().toISOString(),
+                                                    details: {changed_by: currentUser.name, changes: {priority: newPriority}}
+                                                }, ...prev])
+                                                toast.success("Priority updated")
+                                            } 
+                                            catch (err) {
+                                                console.error("Error updating priority:", err)
+                                            }
+                                        }}
+                                        style = {{backgroundColor: "#141414", border: "1px solid #262626", color: "#ffffff", padding: "4px 8px", borderRadius: "4px", fontSize: "12px"}}
+                                    >
+                                        <option value = "low">Low</option>
+                                        <option value = "medium">Medium</option>
+                                        <option value = "high">High</option>
+                                    </select>
+                                ) : (
+                                    <span style = {{
+                                        backgroundColor: selectedCase.priority === "high" ? "rgba(239,68,68,0.1)" : selectedCase.priority === "medium" ? "rgba(245,158,11,0.1)" : "rgba(16,185,129,0.1)",
+                                        color: selectedCase.priority === "high" ? "#ef4444" : selectedCase.priority === "medium" ? "#f59e0b" : "#10b981",
+                                        padding: "4px 10px", borderRadius: "4px", fontSize: "12px"
+                                    }}>
+                                        {selectedCase.priority} priority
+                                    </span>
+                                )}
+
 
                                 {/* Category badge */}
                                 {selectedCase.category && (
@@ -574,19 +612,7 @@ export default function Cases() {
                                         {selectedCase.category}
                                     </span>
                                 )}
-
-                                {/* Priority badge (low, medium, high) */}
-                                <span style = {{
-                                    backgroundColor: selectedCase.priority === "high" ? "rgba(239,68,68,0.1)" : selectedCase.priority === "medium" ? "rgba(245,158,11,0.1)" : "rgba(16,185,129,0.1)",
-                                    color: selectedCase.priority === "high" ? "#ef4444" : selectedCase.priority === "medium" ? "#f59e0b" : "#10b981",
-                                    padding: "4px 10px",
-                                    borderRadius: "4px",
-                                    fontSize: "12px"
-                                }}>
-                                    {selectedCase.priority} priority
-                                </span>
                             </div>
-
                             <div style = {{marginTop: "1rem", marginBottom: "1rem"}}>
                                 <span style = {{fontSize: "12px", color: "#a3a3a3", display: "block", marginBottom: "8px"}}>
                                     Assigned to:
@@ -917,6 +943,9 @@ export default function Cases() {
                                                         )}
                                                         {log.details?.changes?.custom_role_id !== undefined && (
                                                             <span> → role changed to <span style = {{color: "#ffffff", fontWeight: "700"}}>{log.details.changes.role_name || "None"}</span></span>
+                                                        )}
+                                                        {log.details?.changes?.priority && (
+                                                            <span> → priority changed to <span style = {{color: "#ffffff", fontWeight: "700"}}>{log.details.changes.priority}</span></span>
                                                         )}
                                                     </p>
                                                     <p style = {{fontSize: "11px", color: "#a3a3a3"}}>

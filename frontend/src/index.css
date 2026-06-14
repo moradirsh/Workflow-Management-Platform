@@ -51,14 +51,14 @@ hr {
 }
 
 ::-webkit-scrollbar-track {
-    background: #0f1117;
+    background: #0a0a0a;
 }
 
 ::-webkit-scrollbar-thumb {
-    background: #2e303a;
+    background: #3f3a3a;
     border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-    background: #4a4c5a;
+    background: #a3a3a3;
 }

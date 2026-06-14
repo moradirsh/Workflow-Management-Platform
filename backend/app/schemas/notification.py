@@ -1,15 +1,13 @@
 from pydantic import BaseModel
 from datetime import datetime
 
-class RoleCreate(BaseModel):
-    name: str
-
-class RoleRead(BaseModel):
+class NotificationRead(BaseModel):
     id: int
-    name: str
-    org_id: int
+    message: str
+    case_id: int | None = None
+    is_read: bool
     created_at: datetime
 
-    model_config = { 
+    model_config = {
         "from_attributes": True
         }

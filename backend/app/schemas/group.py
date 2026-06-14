@@ -11,7 +11,9 @@ class GroupRead(BaseModel):
     org_id: int
     created_at: datetime
 
-    model_config = {"from_attributes": True}
+    model_config = {
+        "from_attributes": True
+        }
 
 class GroupMemberRead(BaseModel):
     id: int
@@ -19,4 +21,6 @@ class GroupMemberRead(BaseModel):
     email: str
     role: str
 
-    model_config = {"from_attributes": True}
+    model_config = {
+        "from_attributes": True
+        }

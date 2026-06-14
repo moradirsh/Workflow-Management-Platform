@@ -116,3 +116,7 @@ class OrgRegister(BaseModel):
         if len(v) < 2:
             raise Error("Organization name must be at least 2 characters")
         return v.strip()
+    
+    model_config = {
+        "from_attributes": True
+        }

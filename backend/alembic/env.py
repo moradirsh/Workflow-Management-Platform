@@ -33,6 +33,7 @@ from app.models.group import Group #type: ignore
 from app.models.custom_role import CustomRole #type: ignore
 from app.models.user_role import UserRole #type: ignore
 from app.models.group_member import GroupMember #type: ignore
+from app.models.notification import Notification #type: ignore
 
 target_metadata = Base.metadata
 

@@ -4,7 +4,6 @@ from fastapi import APIRouter, Depends, HTTPException, Query, UploadFile, File, 
 from fastapi.responses import FileResponse, StreamingResponse
 from sqlalchemy.orm import Session
 from typing import List
-from app.core.dependencies import get_current_user
 from datetime import datetime
 from sqlalchemy import or_
 import os
@@ -23,6 +22,10 @@ from app.services.activity_service import log_activity, get_case_activity
 from app.ai.file_extractor import extract_file_content
 from app.models.group_member import GroupMember
 from app.models.user_role import UserRole
+from app.services.notification_service import notify_assignee, notify_group, notify_role
+from app.core.dependencies import get_current_user
+
+
 
 router = APIRouter(prefix = "/cases", tags = ["Cases"])
 
@@ -53,6 +56,14 @@ async def create_case_endpoint(title: str = Form(...), description: str | None =
     # Now pass in new case with file components
     new_case = create_case(db, title, description, assignee_id, priority, file_content, file_path, file_name, current_user.org_id, created_by = current_user.id, group_id = group_id, custom_role_id = custom_role_id)
     log_activity(db, new_case.id, current_user.id, "case_created", {"title": new_case.title})
+        
+    # Now notify the user
+    if assignee_id:
+        notify_assignee(db, new_case.id, assignee_id, title)
+    if group_id:
+        notify_group(db, new_case.id, group_id, title)
+    if custom_role_id:
+        notify_role(db, new_case.id, custom_role_id, title)
     return new_case
 
 # List all cases based on org (now uses backend search instead of frontend)
@@ -186,6 +197,7 @@ def update_case_endpoint(case_id: int, updates: CaseUpdate, db: Session = Depend
         if updates.assignee_id:
             user = db.query(User).filter(User.id == updates.assignee_id).first()
             assignee_name = user.name if user else "Unknown"
+            notify_assignee(db, case_id, updates.assignee_id, case.title)
         changes["assignee_id"] = updates.assignee_id
         changes["assignee_name"] = assignee_name
     if "group_id" in updates.model_fields_set:
@@ -216,6 +228,8 @@ def update_case_endpoint(case_id: int, updates: CaseUpdate, db: Session = Depend
 # Del case
 @router.delete("/{case_id}", status_code = 204)
 def delete_case_endpoint(case_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    if current_user.role not in ["admin", "owner"]:
+        raise HTTPException(status_code = 403, detail = "Only admins and owners can delete cases")
     case = get_case(db, case_id)
     if not case:
         raise HTTPException(status_code = 404, detail = "Case not found")

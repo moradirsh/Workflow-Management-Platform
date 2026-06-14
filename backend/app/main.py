@@ -15,6 +15,7 @@ from slowapi.errors import RateLimitExceeded
 from slowapi.middleware import SlowAPIMiddleware
 from app.api.group_router import router as group_router
 from app.api.custom_role_router import router as custom_role_router
+from app.api.notification_router import router as notification_router
 
 app = FastAPI(title = "Workflow Management Platform")
 
@@ -44,6 +45,7 @@ app.include_router(comment_router)
 app.include_router(organization_router)
 app.include_router(group_router)
 app.include_router(custom_role_router)
+app.include_router(notification_router)
 
 # Auto create required postgres tables; if new columns are added, manually delete table and re-run
 Base.metadata.create_all(bind = engine)

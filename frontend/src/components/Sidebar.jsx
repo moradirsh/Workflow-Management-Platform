@@ -1,9 +1,16 @@
 import {useNavigate} from "react-router-dom"
 import {useAuth} from "../context/AuthContext"
+import {useState, useEffect, useRef} from "react"
+import api from "../api/axios"
+import {toast} from "sonner"
 
 export default function Sidebar() {
     const {logoutUser} = useAuth()
     const navigate = useNavigate()
+    const [notifOpen, setNotifOpen] = useState(false)
+    const [notifications, setNotifications] = useState([])
+    const [unreadCount, setUnreadCount] = useState(0)
+    const prevCountRef = useRef(0)
     const handleLogout = () => { // It'll clear the token from user
         logoutUser()
         navigate("/login")
@@ -12,10 +19,7 @@ export default function Sidebar() {
     const navItem = (label, path) => ( // Nav bar when pressing and scrolling on a case
         <div
             onClick = {() => navigate(path)}
-            style = {{
-                padding: "10px 16px",
-                cursor: "pointer",
-                fontSize: "13px",
+            style = {{padding: "10px 16px", cursor: "pointer", fontSize: "13px",
                 borderLeft: location.pathname === path ? "2px solid #ffffff" : "2px solid transparent",
                 color: location.pathname === path ? "#f5f5f5" : "#a3a3a3",
                 backgroundColor: location.pathname === path ? "#141414" : "transparent",
@@ -24,7 +28,46 @@ export default function Sidebar() {
         >
             {label}
         </div>
-)
+    )
+
+    // Fetch unread count on load and every 30 seconds
+    useEffect(() => {
+        const fetchUnread = async () => {
+            try {
+                await api.delete("/notifications/clear-old")
+                const res = await api.get("/notifications/unread-count")
+                const newCount = res.data.count
+            
+            // Toast now shows if new notifs arrived
+            if (newCount > prevCountRef.current) {
+                toast.info("You have new notifications")
+            }
+            prevCountRef.current = newCount
+            setUnreadCount(newCount)
+            } 
+            catch (err) {
+                console.error("Error fetching unread count:", err)
+            }
+        }
+        fetchUnread()
+        const interval = setInterval(fetchUnread, 30000)
+        return () => clearInterval(interval)
+    }, [])
+
+    const handleOpenNotifs = async () => {
+        setNotifOpen(!notifOpen)
+        if (!notifOpen) {
+            try {
+                const res = await api.get("/notifications")
+                setNotifications(res.data)
+                await api.put("/notifications/mark-read")
+                setUnreadCount(0)
+            } 
+            catch (err) {
+                console.error("Error fetching notifications:", err)
+            }
+        }
+    }
 
     return (
         <div style = {{width: "200px", minWidth: "200px", height: "100vh", borderRight: "1px solid #262626", display: "flex", flexDirection: "column", backgroundColor: "#0a0a0a"}}>
@@ -51,6 +94,49 @@ export default function Sidebar() {
                     System
                 </p>
                 {navItem("Settings", "/settings")}
+
+                {/* Notifications */}
+                <div style = {{position: "relative"}}>
+                    <div
+                        onClick = {handleOpenNotifs}
+                        style = {{padding: "10px 16px", cursor: "pointer", fontSize: "13px", color: "#a3a3a3", display: "flex", alignItems: "center", gap: "8px"}}
+                    >
+                        <span>Notifications</span>
+                        {unreadCount > 0 && (
+                            <span style = {{backgroundColor: "#ef4444", color: "#ffffff", borderRadius: "50%", width: "18px", height: "18px", fontSize: "11px", display: "flex", alignItems: "center", justifyContent: "center"}}>
+                                {unreadCount}
+                            </span>
+                        )}
+                    </div>
+
+                    {/* Notifications dropdown */}
+                    {notifOpen && (
+                        <div style = {{position: "fixed", left: "210px", bottom: "60px", width: "300px", backgroundColor: "#141414", border: "1px solid #262626", borderRadius: "8px", zIndex: 1000, maxHeight: "400px", overflowY: "auto"}}>
+                            <p style = {{fontSize: "11px", fontWeight: "500", color: "#a3a3a3", textTransform: "uppercase", letterSpacing: "0.06em", padding: "12px 16px", borderBottom: "1px solid #262626"}}>
+                                Notifications
+                            </p>
+                            {notifications.length > 0 ? (
+                                notifications.map(n => (
+                                    <div
+                                        key = {n.id}
+                                        style = {{padding: "12px 16px", borderBottom: "1px solid #262626", backgroundColor: n.is_read ? "transparent" : "#1e1e1e"}}
+                                    >
+                                        <p style = {{fontSize: "13px", color: "#ffffff", marginBottom: "4px"}}>
+                                            {n.message}
+                                        </p>
+                                        <p style = {{fontSize: "11px", color: "#a3a3a3"}}>
+                                            {new Date(n.created_at).toLocaleString()}
+                                        </p>
+                                    </div>
+                                ))
+                            ) : (
+                                <p style = {{fontSize: "13px", color: "#a3a3a3", padding: "1rem"}}>
+                                    No notifications
+                                </p>
+                            )}
+                        </div>
+                    )}
+                </div>
                 <div
                     onClick = {handleLogout}
                     style = {{padding: "10px 16px", cursor: "pointer", fontSize: "13px", color: "#ef4444"}}

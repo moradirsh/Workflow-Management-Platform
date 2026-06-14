@@ -21,3 +21,4 @@ class User(Base):
     organization = relationship("Organization", back_populates = "users")
     group_memberships = relationship("GroupMember", back_populates = "user", cascade = "all, delete-orphan")
     user_roles = relationship("UserRole", back_populates = "user", cascade = "all, delete-orphan")
+    notifications = relationship("Notification", back_populates = "user", cascade = "all, delete-orphan")
