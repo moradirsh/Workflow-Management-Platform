@@ -26,6 +26,9 @@ def get_comments(case_id: int, db: Session = Depends(get_db), current_user: User
 # Add a comment to a specific case (The one selected)
 @router.post("/{case_id}/comments", response_model = CommentRead)
 def add_comment(case_id: int, comment: CommentCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    case = db.query(Case).filter(Case.id == case_id).first()
+    if case and case.is_archived:
+        raise HTTPException(status_code = 403, detail = "Cannot comment on an archived case")
     new_comment = Comment(case_id = case_id, author_id = current_user.id, body = comment.body)
     db.add(new_comment)
     db.commit()

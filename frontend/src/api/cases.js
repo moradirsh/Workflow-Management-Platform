@@ -3,6 +3,8 @@ import api from './axios'
 // Wrap api calls
 export const getCases = (assignedToMe = false, search = "", priority = "", status = "", groupIds = [], roleIds = []) => api.get(`/cases?assigned_to_me=${assignedToMe}${search ? `&search=${search}` : ""}${priority ? `&priority=${priority}` : ""}${status ? `&status=${status}` : ""}${groupIds.map(id => `&group_id=${id}`).join('')}${roleIds.map(id => `&custom_role_id=${id}`).join('')}`)
 export const getCase = (id) => api.get(`/cases/${id}`)
+export const archiveCase = (id) => api.put(`/archive/${id}`)
+export const getArchivedCases = () => api.get('/archive')
 export const createCase = (data, file = null) => {
 
     // Use FormData since we now support file uploads

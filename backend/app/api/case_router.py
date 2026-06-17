@@ -69,8 +69,8 @@ async def create_case_endpoint(title: str = Form(...), description: str | None =
 # List all cases based on org (now uses backend search instead of frontend)
 @router.get("/", response_model = List[CaseRead])
 def list_cases(db: Session = Depends(get_db), assigned_to_me: bool = False, search: str | None = None, priority: str | None = None, status: str | None = None, group_id: List[int] = Query(default = []), custom_role_id: List[int] = Query(default = []), current_user: User = Depends(get_current_user)):
-    query = db.query(Case).filter(Case.org_id == current_user.org_id)
-
+    query = db.query(Case).filter(Case.org_id == current_user.org_id, Case.is_archived == False)
+    
     # Members only see cases relevant to them
     if current_user.role == "member":
         
@@ -188,6 +188,8 @@ def update_case_endpoint(case_id: int, updates: CaseUpdate, db: Session = Depend
     case = get_case(db, case_id)
     if not case:
         raise HTTPException(status_code=404, detail="Case not found")
+    if case.is_archived:
+        raise HTTPException(status_code = 403, detail = "Cannot update an archived case")
     changes = {}
     if updates.status and updates.status != case.status:
         changes["previous_status"] = case.status

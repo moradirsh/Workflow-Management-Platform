@@ -1,5 +1,5 @@
 import {useState, useEffect} from "react";
-import {getCases, updateCase, deleteCase, createCase, getUsers, getCaseActivity, downloadFile, getComments, addComment, getCase, exportCases, getGroups, getCustomRoles} from "../api/cases";
+import {getCases, updateCase, deleteCase, createCase, getUsers, getCaseActivity, downloadFile, getComments, addComment, getCase, exportCases, getGroups, getCustomRoles, archiveCase} from "../api/cases";
 import ReactMarkdown from "react-markdown";
 import Sidebar from "../components/Sidebar"
 import {toast} from "sonner"
@@ -518,26 +518,46 @@ export default function Cases() {
                                     </span>
                                 </h2>
                                 {(currentUser?.role === "admin" || currentUser?.role === "owner") && (
-                                <button
-                                    onClick = {async () => {
-
-                                        // Will be confirmation to delete case
-                                        const confirmed = window.confirm("Are you sure you want to delete this case? This action is irreversible.")
-                                        if (!confirmed) return
-                                        try {
-                                            await deleteCase(selectedCase.id)
-                                            setCases(prev => prev.filter(c => c.id !== selectedCase.id))
-                                            setSelectedCase(null)
-                                            toast.success("Case deleted")
-                                        } 
-                                        catch (err) {
-                                            console.error("Error deleting case:", err)
-                                        }
-                                    }}
-                                    style = {{color: "#ef4444", background: "none", border: "1px solid #ef4444", padding: "4px 10px", cursor: "pointer", borderRadius: "4px", fontSize: "12px"}}
-                                >
-                                    Delete
-                                </button>
+                                    <div style = {{display: "flex", gap: "8px"}}>
+                                        {!selectedCase.is_archived && (
+                                            <button
+                                                onClick = {async () => {
+                                                    const confirmed = window.confirm("Are you sure you want to archive this case? This action is irreversible.")
+                                                    if (!confirmed) return
+                                                    try {
+                                                        await archiveCase(selectedCase.id)
+                                                        setCases(prev => prev.filter(c => c.id !== selectedCase.id))
+                                                        setSelectedCase(null)
+                                                        toast.success("Case archived")
+                                                    } 
+                                                    catch (err) {
+                                                        toast.error("Failed to archive case")
+                                                    }
+                                                }}
+                                                style = {{color: "#f59e0b", background: "none", border: "1px solid #f59e0b", padding: "4px 10px", cursor: "pointer", borderRadius: "4px", fontSize: "12px"}}
+                                            >
+                                                Archive
+                                            </button>
+                                        )}
+                                        <button
+                                            onClick = {async () => {
+                                                const confirmed = window.confirm("Are you sure you want to delete this case? This action is irreversible.")
+                                                if (!confirmed) return
+                                                try {
+                                                    await deleteCase(selectedCase.id)
+                                                    setCases(prev => prev.filter(c => c.id !== selectedCase.id))
+                                                    setSelectedCase(null)
+                                                    toast.success("Case deleted")
+                                                } 
+                                                catch (err) {
+                                                    console.error("Error deleting case:", err)
+                                                }
+                                            }}
+                                            style = {{color: "#ef4444", background: "none", border: "1px solid #ef4444", padding: "4px 10px", cursor: "pointer", borderRadius: "4px", fontSize: "12px"}}
+                                        >
+                                            Delete
+                                        </button>
+                                    </div>
                                 )}
                             </div>
 

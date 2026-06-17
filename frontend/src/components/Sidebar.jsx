@@ -11,6 +11,7 @@ export default function Sidebar() {
     const [notifications, setNotifications] = useState([])
     const [unreadCount, setUnreadCount] = useState(0)
     const prevCountRef = useRef(0)
+    const [currentUser, setCurrentUser] = useState(null)
     const handleLogout = () => { // It'll clear the token from user
         logoutUser()
         navigate("/login")
@@ -69,6 +70,18 @@ export default function Sidebar() {
         }
     }
 
+    useEffect(() => {
+        const fetchUser = async () => {
+            try {
+                const res = await api.get("/users/me")
+                setCurrentUser(res.data)
+            } catch (err) {
+                console.error("Error fetching user:", err)
+            }
+        }
+        fetchUser()
+    }, [])
+
     return (
         <div style = {{width: "200px", minWidth: "200px", height: "100vh", borderRight: "1px solid #262626", display: "flex", flexDirection: "column", backgroundColor: "#0a0a0a"}}>
 
@@ -84,8 +97,11 @@ export default function Sidebar() {
                 </p>
                 {navItem("Cases", "/cases")}
                 {navItem("Dashboard", "/dashboard")}
-                {navItem("Users", "/users")}
-                {navItem("Groups", "/groups")}
+
+                {/* Only admins and owners can view */}
+                {(currentUser?.role === "admin" || currentUser?.role === "owner") && navItem("Users", "/users")}
+                {(currentUser?.role === "admin" || currentUser?.role === "owner") && navItem("Groups", "/groups")}
+                {(currentUser?.role === "admin" || currentUser?.role === "owner") && navItem("Archive", "/archive")}
             </div>
 
             {/* System */}

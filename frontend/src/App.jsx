@@ -10,6 +10,7 @@ import Landing from "./pages/Landing"
 import Users from "./pages/Users"
 import Groups from "./pages/Groups"
 import InactivityWarning from "./components/InactivityWarning"
+import Archive from "./pages/Archive"
 
 // Forced /landing if not auth by default
 function ProtectedRoute({ children }) {
@@ -36,6 +37,7 @@ function AppContent() {
                 <Route path = "/users" element = {<ProtectedRoute><Users /></ProtectedRoute>} />
                 <Route path = "/settings" element = {<ProtectedRoute><Settings /></ProtectedRoute>} />
                 <Route path = "/groups" element = {<ProtectedRoute><Groups /></ProtectedRoute>} />
+                <Route path = "/archive" element = {<ProtectedRoute><Archive /></ProtectedRoute>} />
                 <Route path = "/landing" element = {<Landing />} />
                 <Route path = "/" element = {<Navigate to = "/landing" />} />
             </Routes>

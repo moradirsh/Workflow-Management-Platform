@@ -42,6 +42,7 @@ class CaseRead(BaseModel):
     created_by_name: str | None = None
     group_id: int | None = None
     custom_role_id: int | None = None
+    is_archived: bool = False
 
     # Look at objects attributes instead of relying on dict
     model_config = {
