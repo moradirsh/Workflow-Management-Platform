@@ -267,7 +267,8 @@ export default function Cases() {
                                             onClick = {() => {
                                                 if (groupFilter.includes(g.id)) {
                                                     setGroupFilter(groupFilter.filter(id => id !== g.id))
-                                                } else {
+                                                } 
+                                                else {
                                                     setGroupFilter([...groupFilter, g.id])
                                                 }
                                             }}
@@ -305,7 +306,8 @@ export default function Cases() {
                                             onClick = {() => {
                                                 if (roleFilter.includes(r.id)) {
                                                     setRoleFilter(roleFilter.filter(id => id !== r.id))
-                                                } else {
+                                                } 
+                                                else {
                                                     setRoleFilter([...roleFilter, r.id])
                                                 }
                                             }}

@@ -14,9 +14,11 @@ export default function Archive() {
             try {
                 const res = await getArchivedCases()
                 setCases(res.data)
-            } catch (err) {
+            } 
+            catch (err) {
                 console.error("Error fetching archived cases:", err)
-            } finally {
+            } 
+            finally {
                 setLoading(false)
             }
         }
