@@ -30,6 +30,24 @@ export default function Register() {
         }
     }
 
+    // Password strength indicator
+    const getPasswordStrength = (password) => {
+        if (!password) return null
+        let score = 0
+        if (password.length >= 8) score++
+        if (/[A-Z]/.test(password)) score++
+        if (/[0-9]/.test(password)) score++
+        if (/[^A-Za-z0-9]/.test(password)) score++
+        
+        if (score === 1) return {label: "Weak", color: "#ef4444", width: "25%"}
+        if (score === 2) return {label: "Fair", color: "#f59e0b", width: "50%"}
+        if (score === 3) return {label: "Good", color: "#3b82f6", width: "75%"}
+        if (score === 4) return {label: "Strong", color: "#10b981", width: "100%"}
+        
+        // Handle default of 0 so we dont unintentionally return null
+        return {label: "Weak", color: "#ef4444", width: "25%"}
+    }
+
     return (
         <div style = {{width: "500px", margin: "60px auto", padding: "1rem"}}>
             <div style = {{textAlign: "center", marginBottom: "-30px", paddingBottom: "3rem"}}>
@@ -97,6 +115,19 @@ export default function Register() {
                         onChange = {(e) => setForm({...form, password: e.target.value})}
                         style = {{display: "block", width: "100%", padding: "8px", boxSizing: "border-box", backgroundColor: "#0a0a0a"}}
                     />
+                     {form.password && (() => {
+                        const strength = getPasswordStrength(form.password)
+                        return (
+                            <div style = {{marginTop: "6px"}}>
+                                <div style = {{backgroundColor: "#262626", borderRadius: "4px", height: "4px", width: "100%"}}>
+                                    <div style = {{backgroundColor: strength.color, borderRadius: "4px", height: "4px", width: strength.width, transition: "width 0.3s ease"}} />
+                                </div>
+                                <p style = {{fontSize: "11px", color: strength.color, marginTop: "4px"}}>
+                                    {strength.label}
+                                </p>
+                            </div>
+                        )
+                    })()}
                 </div>
                 <button
                     onClick = {handleRegister}

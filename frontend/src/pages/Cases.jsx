@@ -447,17 +447,17 @@ export default function Cases() {
 
                             {/* File upload */}
                             <div style = {{marginBottom: "8px"}}>
-                                <input
-                                    type = "file"
-                                    accept = ".pdf,.docx,.doc,.jpg,.jpeg,.png"
-                                    onChange = {(e) => setSelectedFile(e.target.files[0])}
-                                    style = {{display: "block", width: "100%", fontSize: "12px", color: "#a3a3a3", backgroundColor: "#141414"}}
-                                />
-                                {selectedFile && (
-                                    <p style = {{fontSize: "11px", color: "#ffffff", marginTop: "4px"}}>
-                                        {selectedFile.name}
-                                    </p>
-                                )}
+                                <label
+                                    style = {{display: "block", width: "100%", padding: "4px", boxSizing: "border-box", backgroundColor: "#ffffff", color: "#0a0a0a", borderRadius: "4px", fontSize: "14px", cursor: "pointer", textAlign: "center"}}
+                                >
+                                    {selectedFile ? selectedFile.name : "Choose File"}
+                                    <input
+                                        type = "file"
+                                        accept = ".pdf,.docx,.doc,.jpg,.jpeg,.png"
+                                        onChange = {(e) => setSelectedFile(e.target.files[0])}
+                                        style = {{display: "none"}}
+                                    />
+                                </label>
                             </div>
                             <button
                                 onClick = {handleCreateCase}

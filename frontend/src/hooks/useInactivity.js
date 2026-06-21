@@ -1,8 +1,8 @@
 import {useState, useEffect, useRef} from "react"
 import {useNavigate} from "react-router-dom"
 
-const INACTIVE_LIMIT = 5 * 60 * 1000 // 15 mins
-const WARNING_TIME = 1 * 60  * 1000
+const INACTIVE_LIMIT = 15 * 60 * 1000 // 15 mins
+const WARNING_TIME = 2 * 60  * 1000
 
 export function useInactivity() {
     const [showWarning, setShowWarning] = useState(false)
@@ -38,7 +38,7 @@ export function useInactivity() {
         const events = ["mousemove", "keydown", "click", "scroll", "touchstart"]
         events.forEach(e => document.addEventListener(e, resetTimers))
         resetTimers()
-
+        
         return () => {
             events.forEach(e => document.removeEventListener(e, resetTimers))
             clearTimeout(inactiveTimer.current)
