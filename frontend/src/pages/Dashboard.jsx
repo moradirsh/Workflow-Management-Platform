@@ -1,29 +1,33 @@
 import {useState, useEffect} from "react"
 import {getCases} from "../api/cases"
 import Sidebar from "../components/Sidebar"
+import api from "../api/axios"
 
 export default function Dashboard() {
     const[cases, setCases] = useState([])
     const[loading, setLoading] = useState(true)
+    const[stats, setStats] = useState(null)
 
     // Fetch all the cases when page is loading
     useEffect(() => {
-        const fetchCases = async () => {
+        const fetchData = async () => {
             try {
-                const response = await getCases()
-                setCases(response.data)
-            }
+                const [casesRes, statsRes] = await Promise.all([
+                    getCases(),
+                    api.get("/cases/stats")
+                ])
+                setCases(casesRes.data)
+                setStats(statsRes.data)
+            } 
             catch (err) {
-                console.error("Error fetching cases:", err)
-            }
+                console.error("Error fetching dashboard data:", err)
+            } 
             finally {
                 setLoading(false)
             }
         }
-    
-    fetchCases()
-    
-}, []) 
+        fetchData()
+    }, [])
 
 // Stats from cases
 const total = cases.length 
@@ -55,6 +59,66 @@ return (
             <h2 style = {{marginBottom: "2rem", color: "#f5f5f5"}}>
                 Dashboard
             </h2>
+
+            {/* Key metrics */}
+            <p style = {{fontSize: "11px", color: "#a3a3a3", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: "1rem"}}>
+                Key Metrics
+            </p>
+            <div style = {{display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "12px", marginBottom: "2rem"}}>
+                {[
+                    {label: "Overdue Cases", value: stats?.overdue ?? 0, color: "#ef4444", sublabel: "Open 7+ days"},
+                    {label: "Unassigned", value: stats?.unassigned ?? 0, color: "#f59e0b", sublabel: "Need attention"},
+                    {label: "Avg Resolution", value: stats?.avg_resolution_days ?? 0, color: "#60a5fa", sublabel: "Days to resolve"},
+                    {label: "Total Open", value: stats?.total_open ?? 0, color: "#ffffff", sublabel: "Active cases"}
+                ].map((stat) => (
+                    <div
+                        key = {stat.label}
+                        style = {{backgroundColor: "#141414", border: "1px solid #262626", borderRadius: "8px", padding: "1.25rem"}}
+                    >
+                        <p style = {{fontSize: "12px", color: "#a3a3a3", marginBottom: "8px"}}>
+                            {stat.label}
+                        </p>
+                        <p style = {{fontSize: "28px", fontWeight: "600", color: stat.color}}>
+                            {stat.value}
+                        </p>
+                        <p style = {{fontSize: "11px", color: "#737373", marginTop: "4px"}}>
+                            {stat.sublabel}
+                        </p>
+                    </div>
+                ))}
+            </div>
+
+            {/* Workload by assignee */}
+            {stats?.workload?.length > 0 && (
+                <>
+                    <p style = {{fontSize: "11px", color: "#a3a3a3", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: "1rem"}}>
+                        Workload by Assignee
+                    </p>
+                    <div style = {{backgroundColor: "#141414", border: "1px solid #262626", borderRadius: "8px", padding: "1rem", marginBottom: "2rem"}}>
+                        {stats.workload.map((w) => (
+                            <div
+                                key = {w.name}
+                                style = {{display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 0", borderBottom: "1px solid #262626"}}
+                            >
+                                <span style = {{fontSize: "13px", color: "#ffffff"}}>{w.name}</span>
+                                <div style = {{display: "flex", alignItems: "center", gap: "12px"}}>
+                                    <div style = {{width: "120px", backgroundColor: "#262626", borderRadius: "4px", height: "6px"}}>
+                                        <div style = {{
+                                            width: `${Math.min((w.count / Math.max(...stats.workload.map(x => x.count))) * 100, 100)}%`,
+                                            backgroundColor: "#ffffff",
+                                            borderRadius: "4px",
+                                            height: "6px"
+                                        }} />
+                                    </div>
+                                    <span style = {{fontSize: "13px", color: "#ffffff", fontWeight: "500", width: "20px", textAlign: "right"}}>
+                                        {w.count}
+                                    </span>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </>
+            )}
 
             {/* Status stats */}
             <p style = {{fontSize: "11px", color: "#a3a3a3", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: "1rem"}}>

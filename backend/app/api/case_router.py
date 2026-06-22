@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, UploadFile, File, 
 from fastapi.responses import FileResponse, StreamingResponse
 from sqlalchemy.orm import Session
 from typing import List
-from datetime import datetime
+from datetime import datetime, timedelta
 from sqlalchemy import or_
 import os
 import uuid
@@ -168,6 +168,55 @@ def export_cases_csv(db: Session = Depends(get_db), current_user: User = Depends
 def get_actvitiy_endpoint(case_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)
 ):
     return get_case_activity(db, case_id)
+
+# Certain statistics invoving opened cases, unassigned cases, and overdue cases
+@router.get("/stats")
+def get_case_stats(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    base_query = db.query(Case).filter(Case.org_id == current_user.org_id, Case.is_archived == False)
+
+    # Member scoping
+    if current_user.role == "member":
+        from app.models.group_member import GroupMember
+        from app.models.user_role import UserRole
+        from sqlalchemy import or_
+        user_group_ids = [gm.group_id for gm in db.query(GroupMember).filter(GroupMember.user_id == current_user.id).all()]
+        user_role_ids = [ur.role_id for ur in db.query(UserRole).filter(UserRole.user_id == current_user.id).all()]
+        base_query = base_query.filter(or_(Case.assignee_id == current_user.id, Case.created_by == current_user.id,
+                Case.group_id.in_(user_group_ids) if user_group_ids else False,
+                Case.custom_role_id.in_(user_role_ids) if user_role_ids else False))
+
+    # Total open cases
+    total_open = base_query.filter(Case.status == "open").count()
+
+    # Unassigned cases
+    unassigned = base_query.filter(Case.assignee_id == None).count()
+
+    # Overdue cases (open for 7+ days)
+    cutoff = datetime.utcnow() - timedelta(days = 7)
+    overdue = base_query.filter(
+        Case.status != "resolved",
+        Case.created_at < cutoff
+    ).count()
+
+    # Avg resolution time in days based on x cases in the "resolved"
+    resolved_cases = base_query.filter(Case.status == "resolved").all()
+    if resolved_cases:
+        total_days = sum(
+            (c.updated_at - c.created_at).days for c in resolved_cases if c.updated_at and c.created_at
+        )
+        avg_resolution = round(total_days / len(resolved_cases), 1)
+    else:
+        avg_resolution = 0
+
+    # Workload by assignee
+    from sqlalchemy import func
+    workload = db.query(User.name, func.count(Case.id).label("count")).join(Case, Case.assignee_id == User.id
+    ).filter(Case.org_id == current_user.org_id, Case.is_archived == False, Case.status != "resolved").group_by(User.name).all()
+
+    return {
+        "total_open": total_open, "unassigned": unassigned, "overdue": overdue, "avg_resolution_days": avg_resolution,
+        "workload": [{"name": w.name, "count": w.count} for w in workload]
+    }
 
 # Get a single case by ID
 @router.get("/{case_id}", response_model = CaseRead)

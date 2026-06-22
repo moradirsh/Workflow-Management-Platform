@@ -1,4 +1,4 @@
-import { createContext, useContext, useState } from "react"
+import {createContext, useContext, useState} from "react"
 
 // Create AuthContext to manage authentication state across the app
 const AuthContext = createContext()
