@@ -42,7 +42,9 @@ function AppContent() {
                 <Route path = "/groups" element = {<ProtectedRoute><Groups /></ProtectedRoute>} />
                 <Route path = "/archive" element = {<ProtectedRoute><Archive /></ProtectedRoute>} />
                 <Route path = "/landing" element = {<Landing />} />
-                <Route path="/" element = {loading ? null : token ? <Navigate to="/cases" /> : <Navigate to="/landing" />} />
+                
+                {/* If loading and token exists, then send to cases. If not direct to landing*/}
+                <Route path = "/" element = {loading ? null : token ? <Navigate to = "/cases" /> : <Navigate to = "/landing" />} />
             </Routes>
         </>
     )
