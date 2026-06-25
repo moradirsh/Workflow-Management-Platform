@@ -14,7 +14,10 @@ import Archive from "./pages/Archive"
 
 // Forced /landing if not auth by default
 function ProtectedRoute({ children }) {
-    const { token } = useAuth()
+    const { token, loading } = useAuth()
+
+    if (loading) return null // Wait for authcontext to check
+
     if (!token) {
         return <Navigate to = "/landing" replace />
     }
@@ -23,7 +26,7 @@ function ProtectedRoute({ children }) {
 
 // Implementation now ensures that inactivty will log out user, whilst protecting every route
 function AppContent() {
-    const { token } = useAuth()
+    const { token, loading } = useAuth()
     const { showWarning, resetTimers } = useInactivity()
 
     return (
@@ -39,7 +42,7 @@ function AppContent() {
                 <Route path = "/groups" element = {<ProtectedRoute><Groups /></ProtectedRoute>} />
                 <Route path = "/archive" element = {<ProtectedRoute><Archive /></ProtectedRoute>} />
                 <Route path = "/landing" element = {<Landing />} />
-                <Route path = "/" element = {<Navigate to = "/landing" />} />
+                <Route path="/" element = {loading ? null : token ? <Navigate to="/cases" /> : <Navigate to="/landing" />} />
             </Routes>
         </>
     )

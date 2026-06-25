@@ -1,5 +1,5 @@
 # Alter user info, login, register/org
-from fastapi import APIRouter, Depends, HTTPException 
+from fastapi import APIRouter, Depends, HTTPException, Response
 from sqlalchemy.orm import Session
 from typing import List
 from app.schemas.user import UserCreate, UserRead, UserLogin, TokenResponse, UserUpdate, AdminUserUpdate, OrgRegister, AdminUserCreate
@@ -9,6 +9,7 @@ from app.core.security import hash_password, verify_password, create_access_toke
 from app.core.dependencies import get_current_user
 from app.models.organization import Organization
 import re
+from fastapi.responses import JSONResponse
 
 router = APIRouter(prefix = "/users", tags = ["Users"])
 
@@ -36,14 +37,18 @@ def register_user(data: OrgRegister, db: Session = Depends(get_db)):
     db.refresh(new_user)
     return new_user
 
-# Handle login
-@router.post("/login", response_model = TokenResponse)
-def login(user: UserLogin, db: Session = Depends(get_db)):
+# Handle login, now will use httpOnly cookie for the JWT instead of returning it in the response body
+# Originally was done using the localstorage, issue is that token can be stolen if malware is ran on the device unkown to user
+@router.post("/login")
+def login(user: UserLogin, response: Response, db: Session = Depends(get_db)):
     db_user = db.query(User).filter(User.email == user.email).first()
     if not db_user or not verify_password(user.password, db_user.hashed_password):
         raise HTTPException(status_code = 401, detail = "Invalid credentials")
     token = create_access_token({"sub": str(db_user.id)})
-    return {"access_token": token, "token_type": "bearer"}
+    
+    # Use httpsonly, use lax for CSRF protection and set the token life to 24 hr
+    response.set_cookie(key = "access_token", value = token, httponly = True, secure = True, samesite = "lax", max_age = 60 * 60 * 24, domain = "localhost")
+    return {"message": "Login successful"}
 
 # Get curr user
 @router.get("/me", response_model = UserRead)
@@ -135,4 +140,9 @@ def admin_update_user(user_id: int, data: AdminUserUpdate, db: Session = Depends
     db.commit()
     db.refresh(user)
     return user
-    
+
+# On manual logout, or 24hr timer access_token will be deleted
+@router.post("/logout")
+def logout(response: Response):
+    response.delete_cookie("access_token")
+    return {"message": "Logged out"}

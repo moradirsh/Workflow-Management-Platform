@@ -1,7 +1,6 @@
 import {useState} from "react"
 import {useNavigate} from "react-router-dom"
 import {useAuth} from "../context/AuthContext"
-import {login} from "../api/auth"
 
 export default function Login() {
     // Tacks what user types in the form
@@ -18,19 +17,22 @@ export default function Login() {
     const handleLogin = async (e) => {
         e.preventDefault()
         setError("")
-
         if (!email || !password) {
             setError("Email and password are required")
             return
         }
         try {
             // Send email and pass to database
-            const response = await login({email, password})
-            loginUser(response.data.access_token) // Save token to context and localStorage
+            await loginUser(email, password)
             navigate("/cases") // Redirect to cases page after login
         } 
         catch (err) {
-            setError("Invalid email or password")
+            if (err.response?.status === 429) {
+                setError("Too many login attempts. Wait a minute and try again.")
+            }
+            else {
+                setError("Invalid email or password")
+            }
         }
     }
 

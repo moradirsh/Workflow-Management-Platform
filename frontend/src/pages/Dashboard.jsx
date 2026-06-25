@@ -105,9 +105,7 @@ return (
                                     <div style = {{width: "120px", backgroundColor: "#262626", borderRadius: "4px", height: "6px"}}>
                                         <div style = {{
                                             width: `${Math.min((w.count / Math.max(...stats.workload.map(x => x.count))) * 100, 100)}%`,
-                                            backgroundColor: "#ffffff",
-                                            borderRadius: "4px",
-                                            height: "6px"
+                                            backgroundColor: "#ffffff", borderRadius: "4px", height: "6px"
                                         }} />
                                     </div>
                                     <span style = {{fontSize: "13px", color: "#ffffff", fontWeight: "500", width: "20px", textAlign: "right"}}>

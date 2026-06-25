@@ -166,7 +166,7 @@ export default function Settings() {
                             if (!doubleConfirm) return
                             try {
                                 await api.delete("/organizations/me")
-                                localStorage.removeItem("token")
+                                await api.post("/users/logout")
                                 window.location.href = "/landing"
                             } 
                             catch (err) {

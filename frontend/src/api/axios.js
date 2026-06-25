@@ -1,33 +1,20 @@
 import axios from 'axios'
+
+// Adjust axios to point to vites /api when necessary, otherwise in production point to render url
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || "http://localhost:8000",
-  headers: {
-    'Content-Type': 'application/json'
-  }
+  baseURL: import.meta.env.VITE_API_URL ? import.meta.env.VITE_API_URL : '/api',
+  withCredentials: true // send cookies automatically
 })
 
 
 // Forces return to login page when catching 401 err returned by backend
 api.interceptors.response.use((response) => response,
   (error) => {
-    if (error.response?.status === 401) {
-      const isLoginRequest = error.config.url.includes('/users/login') // Prevents redirection on incorrect credentials when logging in
-      if (!isLoginRequest) {
-        localStorage.removeItem('token')
-        window.location.href = '/login'
-      }
+    if (error.response?.status === 401 && !isLoginRequest) {
+      window.dispatchEvent(new Event("auth:unauthorized"))
     }
     return Promise.reject(error) // return the error for debugging purposes
   }
 )
-
-// Auto attach JWT token to each request so backend knows user is authenticated each time
-api.interceptors.request.use(config => {
-  const token = localStorage.getItem('token')
-    if (token) {
-        config.headers['Authorization'] = `Bearer ${token}`
-    }
-    return config
-})
 
 export default api

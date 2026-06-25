@@ -12,8 +12,8 @@ export default function Sidebar() {
     const [unreadCount, setUnreadCount] = useState(0)
     const prevCountRef = useRef(0)
     const [currentUser, setCurrentUser] = useState(null)
-    const handleLogout = () => { // It'll clear the token from user
-        logoutUser()
+    const handleLogout = async () => { // It'll clear the token from user
+        await logoutUser()
         navigate("/login")
     }
 
@@ -75,7 +75,8 @@ export default function Sidebar() {
             try {
                 const res = await api.get("/users/me")
                 setCurrentUser(res.data)
-            } catch (err) {
+            } 
+            catch (err) {
                 console.error("Error fetching user:", err)
             }
         }
